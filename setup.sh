@@ -1,6 +1,8 @@
 # install pip
-wget https://github.com/ShivamShrirao/diffusers/raw/main/examples/dreambooth/train_dreambooth.py
-wget https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
+wget -O scripts/train_dreambooth.py https://github.com/ShivamShrirao/diffusers/raw/main/examples/dreambooth/train_dreambooth.py
+wget -O scripts/convert_diffusers_to_original_stable_diffusion.py https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
+wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
+
 pip install git+https://github.com/ShivamShrirao/diffusers
 pip install -U --pre triton
 pip install accelerate==0.12.0 transformers ftfy bitsandbytes gradio natsort
