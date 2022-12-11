@@ -1,3 +1,4 @@
-scripts/
-Fast-Dreambooth/
 stable-diffusion-v1-5/
+models/
+sessions/
+__pycache__/

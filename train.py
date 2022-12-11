@@ -4,19 +4,39 @@ import time
 from tqdm import tqdm
 from PIL import Image
 from subprocess import getoutput
+from scripts import convertosd
+from scripts import train_dreambooth
 
 Root = '/home/ubuntu/dreambooth/'
 
-WORKSPACE = Root + 'Fast-Dreambooth'
 Crop_images = True
 Crop_size = 512
+
+
+def dump_only_textenc(MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT: str = None, Seed: int = None, precision: str = None, Training_Steps: int = None):
+    train_dreambooth.Run(train_text_encoder=True,
+                         pretrained_model_name_or_path=MODELT_NAME,
+                         instance_data_dir=INSTANCE_DIR,
+                         output_dir=OUTPUT_DIR,
+                         instance_prompt=PT,
+                         seed=Seed,
+                         resolution=512,
+                         mixed_precision=precision,
+                         train_batch_size=1,
+                         gradient_accumulation_steps=1,
+                         gradient_checkpointing=True,
+                         use_8bit_adam=True,
+                         learning_rate=2e-6,
+                         lr_scheduler="polynomial",
+                         lr_warmup_steps=0,
+                         max_train_steps=Training_Steps)
 
 
 def train(Session_Name="emanuele"):
 
     INSTANCE_NAME = Session_Name
     OUTPUT_DIR = Root + "models/"+Session_Name
-    SESSION_DIR = WORKSPACE+'/Sessions/'+Session_Name
+    SESSION_DIR = Root+'sessions/'+Session_Name
     INSTANCE_DIR = SESSION_DIR+'/instance_images'
     MDLPTH = str(SESSION_DIR+"/"+Session_Name+'.ckpt')
 
@@ -42,30 +62,31 @@ def train(Session_Name="emanuele"):
                     image.save(filepath, format="JPEG", quality=100)
                 else:
                     image.save(filepath, format=extension.upper())
-        
+
         # prepare training
-        UNet_Training_Steps=len(files) * 100
+        UNet_Training_Steps = len(files) * 100
         fp16 = True
         if fp16:
-            prec="fp16"
+            prec = "fp16"
         else:
-            prec="no"
-        Text_Encoder_Training_Steps=350
-        Resolution=512
+            prec = "no"
+        Text_Encoder_Training_Steps = 350
+        Resolution = 512
 
         s = getoutput('nvidia-smi')
         if 'A100' in s:
-            precision="no"
+            precision = "no"
         else:
-            precision=prec
-        prc="--fp16" if precision=="fp16" else ""
+            precision = prec
+        prc = "--fp16" if precision == "fp16" else ""
 
-        from scripts.convertosd import convertosd
+        if os.path.exists(OUTPUT_DIR+'/'+'text_encoder_trained'):
+            shutil.rmtree(OUTPUT_DIR + "/text_encoder_trained")
 
-        convertosd(OUTPUT_DIR, SESSION_DIR, Session_Name)
-        
+        dump_only_textenc(None, INSTANCE_DIR, OUTPUT_DIR,
+                          None, None, precision, Training_Steps=Text_Encoder_Training_Steps)
 
-
+        convertosd.Run(OUTPUT_DIR, SESSION_DIR, Session_Name)
 
 
 if __name__ == "__main__":
