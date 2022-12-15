@@ -1,4 +1,5 @@
 # install pip
+mkdir scripts
 wget -O scripts/train_dreambooth.py https://github.com/ShivamShrirao/diffusers/raw/main/examples/dreambooth/train_dreambooth.py
 wget -O scripts/convert_diffusers_to_original_stable_diffusion.py https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
 wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
