@@ -1,4 +1,5 @@
 import os
+import random
 import shutil
 import time
 from tqdm import tqdm
@@ -30,6 +31,23 @@ def dump_only_textenc(MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT: str = None, See
                          lr_scheduler="polynomial",
                          lr_warmup_steps=0,
                          max_train_steps=Training_Steps)
+
+
+def train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT, Seed, Res, precision, Training_Steps):
+    train_dreambooth.Run(
+        pretrained_model_name_or_path=MODELT_NAME,
+        instance_data_dir=INSTANCE_DIR,
+        output_dir=OUTPUT_DIR,
+        instance_prompt=PT,
+        seed=Seed,
+        resolution=Res,
+        mixed_precision=precision,
+        train_batch_size=1,
+        gradient_accumulation_steps=1,
+        learning_rate=2e-6,
+        lr_scheduler="polynomial",
+        lr_warmup_steps=0,
+        max_train_steps=Training_Steps)
 
 
 def train(Session_Name="emanuele"):
@@ -66,6 +84,7 @@ def train(Session_Name="emanuele"):
 
         # prepare training
         UNet_Training_Steps = len(files) * 100
+        Seed = random.randint(1, 999999)
         fp16 = True
         if fp16:
             prec = "fp16"
@@ -84,12 +103,13 @@ def train(Session_Name="emanuele"):
         if os.path.exists(OUTPUT_DIR+'/'+'text_encoder_trained'):
             shutil.rmtree(OUTPUT_DIR + "/text_encoder_trained")
 
-        dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
-                          PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+        # dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
+        #                  PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
 
-        #train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT, Seed, Res, precision, Training_Steps=UNet_Training_Steps)
-    
+        Start_saving_from_the_step = 500
 
+        train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
+                        OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
         convertosd.Run(OUTPUT_DIR, SESSION_DIR, Session_Name)
 

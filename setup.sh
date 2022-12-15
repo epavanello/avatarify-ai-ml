@@ -1,14 +1,15 @@
 # install pip
-mkdir scripts
-wget -O scripts/train_dreambooth.py https://github.com/ShivamShrirao/diffusers/raw/main/examples/dreambooth/train_dreambooth.py
+# wget -O scripts/train_dreambooth.py https://github.com/ShivamShrirao/diffusers/raw/main/examples/dreambooth/train_dreambooth.py
 wget -O scripts/convert_diffusers_to_original_stable_diffusion.py https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
-wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
+# wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
+
+sudo apt update && sudo apt install python3-pip git-lfs
 
 pip install git+https://github.com/ShivamShrirao/diffusers
 pip install -U --pre triton
 pip install accelerate==0.12.0 transformers ftfy bitsandbytes gradio natsort
 pip install https://github.com/brian6091/xformers-wheels/releases/download/0.0.15.dev0%2B4c06c79/xformers-0.0.15.dev0+4c06c79.d20221205-cp38-cp38-linux_x86_64.whl
-pip install torchvision
+pip install torchvision tqdm
 
 # Download model
 mkdir stable-diffusion-v1-5
@@ -28,3 +29,6 @@ wget https://raw.githubusercontent.com/TheLastBen/fast-stable-diffusion/main/Dre
 sed -i 's@"clip_sample": false@@g' scheduler/scheduler_config.json
 sed -i 's@"trained_betas": null,@"trained_betas": null@g' scheduler/scheduler_config.json
 sed -i 's@"sample_size": 256,@"sample_size": 512,@g' vae/config.json  
+
+mkdir sessions
+mkdir models
