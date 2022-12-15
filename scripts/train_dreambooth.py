@@ -426,9 +426,14 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
     pass
 
 
+class DictToObject:
+    def __init__(self, dictionary):
+        self.__dict__.update(dictionary)
+
 def Run(
     pretrained_model_name_or_path: str = None,
-    pretrained_vae_name_or_path: str = None, revision: str = None,
+    pretrained_vae_name_or_path: str = None, 
+    revision: str = None,
     tokenizer_name: str = None,
     instance_data_dir: str = None,
     class_data_dir: str = None,
@@ -440,7 +445,7 @@ def Run(
     save_guidance_scale: float = 7.5,
     save_infer_steps: int = 50,
     pad_tokens=True,
-    with_prior_preservation=True,
+    with_prior_preservation=False,
     prior_loss_weight: float = 1.0,
     num_class_images: int = 100,
     output_dir: str = "text-inversion-model",
@@ -477,9 +482,10 @@ def Run(
     local_rank: int = -1,
     concepts_list: str = None
 ):
-    args = {
+    args = DictToObject({
         "pretrained_model_name_or_path": pretrained_model_name_or_path,
         "pretrained_vae_name_or_path": pretrained_vae_name_or_path,
+        "revision": revision,
         "tokenizer_name": tokenizer_name,
         "instance_data_dir": instance_data_dir,
         "class_data_dir": class_data_dir,
@@ -527,7 +533,7 @@ def Run(
         "hflip": hflip,
         "local_rank": local_rank,
         "concepts_list": concepts_list,
-    }
+    })
     main(args)
 
 

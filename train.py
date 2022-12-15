@@ -33,7 +33,8 @@ def dump_only_textenc(MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT: str = None, See
 
 
 def train(Session_Name="emanuele"):
-
+    MODEL_NAME = Root + "stable-diffusion-v1-5"
+    PT = ""
     INSTANCE_NAME = Session_Name
     OUTPUT_DIR = Root + "models/"+Session_Name
     SESSION_DIR = Root+'sessions/'+Session_Name
@@ -83,8 +84,12 @@ def train(Session_Name="emanuele"):
         if os.path.exists(OUTPUT_DIR+'/'+'text_encoder_trained'):
             shutil.rmtree(OUTPUT_DIR + "/text_encoder_trained")
 
-        dump_only_textenc(None, INSTANCE_DIR, OUTPUT_DIR,
-                          None, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+        dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
+                          PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+
+        #train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT, Seed, Res, precision, Training_Steps=UNet_Training_Steps)
+    
+
 
         convertosd.Run(OUTPUT_DIR, SESSION_DIR, Session_Name)
 
