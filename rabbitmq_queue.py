@@ -1,5 +1,6 @@
 import pika
 import train
+import generate
 
 # Creare una connessione a RabbitMQ
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -11,18 +12,31 @@ channel.queue_declare(queue='train_photos')
 # Definire una funzione di callback per il consumer
 
 
-def callback(_channel, _method, _properties, body: bytes):
-    print(f"Train session: {body.decode()}")
-    try:
-        train.train(body.decode())
-        print("Completed training")
-    finally:
-        pass
+def callback(_channel, method, _properties, body: bytes):
+    if method.routing_key == 'train_photos':
+        print(f"Train session: {body.decode()}")
+        try:
+            train.train(body.decode())
+            print("Completed training")
+        finally:
+            pass
+    elif method.routing_key == 'generate_photos':
+        print(f"Generate image for session: {body.decode()}")
+        try:
+            generate.generate(body.decode())
+            print("Generation complete")
+        finally:
+            pass
 
 
-# Sottoscriversi alla coda e specificare la funzione di callback da utilizzare per i messaggi ricevuti
-channel.basic_consume(
-    queue='train_photos', on_message_callback=callback, auto_ack=True)
+# Consumiamo i messaggi dalla prima coda
+channel.basic_consume(queue='train_photos',
+                      on_message_callback=callback, auto_ack=True)
+
+# Consumiamo i messaggi dalla seconda coda in un nuovo thread
+channel.basic_consume(queue='generate_photos',
+                      on_message_callback=callback, auto_ack=True)
+
 
 # Avviare il consumer in modalità blocking, in attesa di ricevere messaggi
 print('In attesa di ricevere messaggi...')

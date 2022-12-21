@@ -48,14 +48,14 @@ def train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_D
         max_train_steps=Training_Steps)
 
 
-def train(session_Name):
+def train(session_name: str):
     MODEL_NAME = os.path.join(Root, "stable-diffusion-v1-5")
     PT = ""
-    INSTANCE_NAME = session_Name
-    OUTPUT_DIR = os.path.join(Root, "models", session_Name)
-    SESSION_DIR = os.path.join(Root, 'sessions', session_Name)
+    INSTANCE_NAME = session_name
+    OUTPUT_DIR = os.path.join(Root, "models", session_name)
+    SESSION_DIR = os.path.join(Root, 'sessions', session_name)
     INSTANCE_DIR = os.path.join(SESSION_DIR, 'instance_images')
-    MDLPTH = os.path.join(SESSION_DIR, session_Name+'.ckpt')
+    MDLPTH = os.path.join(SESSION_DIR, session_name+'.ckpt')
 
     os.makedirs(INSTANCE_DIR, exist_ok=True)
     print('Session created, proceed to uploading instance images')
@@ -82,7 +82,7 @@ def train(session_Name):
 
     # prepare training
     # TODO restore: It was * 100
-    UNet_Training_Steps = len(files) * 1
+    UNet_Training_Steps = len(files) * 100
     Seed = random.randint(1, 999999)
     fp16 = True
     if fp16:
@@ -90,7 +90,7 @@ def train(session_Name):
     else:
         prec = "no"
     # TODO restore: It was 350
-    Text_Encoder_Training_Steps = 0
+    Text_Encoder_Training_Steps = 350
     Resolution = 512
 
     s = getoutput('nvidia-smi')
@@ -124,7 +124,7 @@ def train(session_Name):
     train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
                     OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
-    convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_Name)
+    convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_name)
 
 
 def create_symlink(name: str, destination_dir: str):

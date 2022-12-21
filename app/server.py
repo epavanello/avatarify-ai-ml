@@ -21,6 +21,7 @@ async def startup_event():
     global CHANNEL
     CHANNEL = CONNECTION.channel()
     CHANNEL.queue_declare(queue="train_photos")
+    CHANNEL.queue_declare(queue="generate_photos")
     print("Queue declared")
 
 
@@ -72,11 +73,14 @@ def list_sessions():
 def test_queue():
     connection = pika.BlockingConnection(
         pika.ConnectionParameters("localhost"))
-    channel = connection.channel()
-    channel.queue_declare(queue="train_photos")
-    channel.basic_publish(
+    CHANNEL.basic_publish(
         exchange="", routing_key="train_photos", body="emanuele")
-    channel.close()
+
+
+@app.get("/generate/")
+def generate(session: str):
+    CHANNEL.basic_publish(
+        exchange="", routing_key="generate_photos", body=session)
 
 
 @ app.get("/")
