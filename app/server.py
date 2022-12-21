@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, Form
 from fastapi.responses import HTMLResponse
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
+from typing import List
 
 app = FastAPI()
 
@@ -33,9 +34,9 @@ def shutdown_event():
 
 
 @app.post("/uploadfiles/")
-async def upload_files(files: list[UploadFile], session: str = Form()):
+async def upload_files(files: List[UploadFile], session: str = Form()):
     counter = 0
-    destination_path = f"models/{session}/instance_images"
+    destination_path = os.path.join("sessions", session, "instance_images")
     shutil.rmtree(destination_path, ignore_errors=True)
     if not os.path.exists(destination_path):
         os.makedirs(destination_path)

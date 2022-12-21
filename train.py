@@ -80,33 +80,33 @@ def train(session_Name):
                 else:
                     image.save(filepath, format=extension.upper())
 
-        # prepare training
-        UNet_Training_Steps = len(files) * 100
-        Seed = random.randint(1, 999999)
-        fp16 = True
-        if fp16:
-            prec = "fp16"
-        else:
-            prec = "no"
-        Text_Encoder_Training_Steps = 350
-        Resolution = 512
+    # prepare training
+    UNet_Training_Steps = len(files) * 100
+    Seed = random.randint(1, 999999)
+    fp16 = True
+    if fp16:
+        prec = "fp16"
+    else:
+        prec = "no"
+    Text_Encoder_Training_Steps = 350
+    Resolution = 512
 
-        s = getoutput('nvidia-smi')
-        if 'A100' in s:
-            precision = "no"
-        else:
-            precision = prec
-        prc = "--fp16" if precision == "fp16" else ""
+    s = getoutput('nvidia-smi')
+    if 'A100' in s:
+        precision = "no"
+    else:
+        precision = prec
+    prc = "--fp16" if precision == "fp16" else ""
 
-        if os.path.exists(OUTPUT_DIR+'/'+'text_encoder_trained'):
-            shutil.rmtree(OUTPUT_DIR + "/text_encoder_trained")
+    if os.path.exists(OUTPUT_DIR+'/'+'text_encoder_trained'):
+        shutil.rmtree(OUTPUT_DIR + "/text_encoder_trained")
 
-        # dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
-        #                  PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+    dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
+                        PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
 
-        Start_saving_from_the_step = 500
+    Start_saving_from_the_step = 500
 
-        train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
-                        OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
+    train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
+                    OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
-        convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_Name)
+    convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_Name)

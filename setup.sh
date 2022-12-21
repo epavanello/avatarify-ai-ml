@@ -9,7 +9,7 @@ pip install git+https://github.com/ShivamShrirao/diffusers
 pip install -U --pre triton
 pip install accelerate==0.12.0 transformers ftfy bitsandbytes gradio natsort
 pip install https://github.com/brian6091/xformers-wheels/releases/download/0.0.15.dev0%2B4c06c79/xformers-0.0.15.dev0+4c06c79.d20221205-cp38-cp38-linux_x86_64.whl
-pip install torchvision tqdm
+pip install torchvision tqdm pika
 
 # Download model
 mkdir stable-diffusion-v1-5
