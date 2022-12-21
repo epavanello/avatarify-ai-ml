@@ -1,14 +1,12 @@
 import os
 import random
 import shutil
-import time
-from tqdm import tqdm
 from PIL import Image
 from subprocess import getoutput
 from scripts import convertosd
 from scripts import train_dreambooth
 
-Root = '/home/ubuntu/dreambooth/'
+Root = os.getcwd()
 
 Crop_images = True
 Crop_size = 512
@@ -50,14 +48,14 @@ def train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_D
         max_train_steps=Training_Steps)
 
 
-def train(Session_Name="emanuele"):
-    MODEL_NAME = Root + "stable-diffusion-v1-5"
+def train(session_Name):
+    MODEL_NAME = os.path.join(Root, "stable-diffusion-v1-5")
     PT = ""
-    INSTANCE_NAME = Session_Name
-    OUTPUT_DIR = Root + "models/"+Session_Name
-    SESSION_DIR = Root+'sessions/'+Session_Name
-    INSTANCE_DIR = SESSION_DIR+'/instance_images'
-    MDLPTH = str(SESSION_DIR+"/"+Session_Name+'.ckpt')
+    INSTANCE_NAME = session_Name
+    OUTPUT_DIR = os.path.join(Root, "models", session_Name)
+    SESSION_DIR = os.path.join(Root, 'sessions', session_Name)
+    INSTANCE_DIR = os.path.join(SESSION_DIR, 'instance_images')
+    MDLPTH = os.path.join(SESSION_DIR, session_Name+'.ckpt')
 
     os.makedirs(INSTANCE_DIR, exist_ok=True)
     print('Session created, proceed to uploading instance images')
@@ -111,8 +109,4 @@ def train(Session_Name="emanuele"):
         train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
                         OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
-        convertosd.Run(OUTPUT_DIR, SESSION_DIR, Session_Name)
-
-
-if __name__ == "__main__":
-    train()
+        convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_Name)

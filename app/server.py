@@ -3,11 +3,33 @@ import shutil
 from fastapi import FastAPI, UploadFile, Form
 from fastapi.responses import HTMLResponse
 import pika
+from pika.adapters.blocking_connection import BlockingChannel
 
 app = FastAPI()
 
+CONNECTION: pika.BlockingConnection
+CHANNEL: BlockingChannel
 
-# Define a callback function to process the message
+
+@app.on_event("startup")
+async def startup_event():
+    global CONNECTION
+    print("Open queue connection")
+    CONNECTION = pika.BlockingConnection(
+        pika.ConnectionParameters("localhost"))
+    global CHANNEL
+    CHANNEL = CONNECTION.channel()
+    CHANNEL.queue_declare(queue="train_photos")
+    print("Queue declared")
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    print("Closing channel")
+    CHANNEL.close()
+    print("Closing connection")
+    CONNECTION.close()
+    print("All closed")
 
 
 @app.post("/uploadfiles/")
@@ -29,19 +51,14 @@ async def upload_files(files: list[UploadFile], session: str = Form()):
                 file.write(await file_upload.read())
     print("Before call queue")
     # Connect to the RabbitMQ server
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters("localhost"))
-    channel = connection.channel()
-    # Declare the queue
-    channel.queue_declare(queue="train_photos")
-    channel.basic_publish(
+
+    CHANNEL.basic_publish(
         exchange="", routing_key="train_photos", body=session)
-    channel.close()
 
     return {"filenames": [file.filename for file in files],  "session": session}
 
 
-@app.get("/sessions/")
+@ app.get("/sessions/")
 def list_sessions():
     # Get the list of directories in the models folder
     sessions = [d for d in os.listdir(
@@ -50,7 +67,7 @@ def list_sessions():
     return {"sessions": sessions}
 
 
-@app.get("/test-queue/")
+@ app.get("/test-queue/")
 def test_queue():
     connection = pika.BlockingConnection(
         pika.ConnectionParameters("localhost"))
@@ -61,7 +78,7 @@ def test_queue():
     channel.close()
 
 
-@app.get("/")
+@ app.get("/")
 async def main():
     content = """
 <body>

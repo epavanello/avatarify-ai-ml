@@ -11,9 +11,9 @@ channel.queue_declare(queue='train_photos')
 # Definire una funzione di callback per il consumer
 
 
-def callback(_channel, _method, _properties, body: str):
-    print(f"Train session: {body}")
-    train.train(body)
+def callback(_channel, _method, _properties, body: bytes):
+    print(f"Train session: {body.decode()}")
+    train.train(body.decode())
 
 
 # Sottoscriversi alla coda e specificare la funzione di callback da utilizzare per i messaggi ricevuti
