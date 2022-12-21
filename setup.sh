@@ -3,7 +3,7 @@
 wget -O scripts/convert_diffusers_to_original_stable_diffusion.py https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
 # wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
 
-sudo apt update && sudo apt install python3-pip git-lfs
+sudo apt update && sudo apt install python3-pip git-lfs rabbitmq-server
 
 pip install git+https://github.com/ShivamShrirao/diffusers
 pip install -U --pre triton

@@ -1,0 +1,77 @@
+import os
+import shutil
+from fastapi import FastAPI, UploadFile, Form
+from fastapi.responses import HTMLResponse
+import pika
+
+app = FastAPI()
+
+
+# Define a callback function to process the message
+
+
+@app.post("/uploadfiles/")
+async def upload_files(files: list[UploadFile], session: str = Form()):
+    counter = 0
+    destination_path = f"models/{session}/instance_images"
+    shutil.rmtree(destination_path, ignore_errors=True)
+    if not os.path.exists(destination_path):
+        os.makedirs(destination_path)
+    for file_upload in files:
+        # Check if the file is a JPEG or PNG
+        if file_upload.content_type in ["image/jpeg", "image/png"]:
+            # Create the directory if it doesn't exist
+            # Increment the counter
+            counter += 1
+            # Save the file to the directory with the session and counter in the filename
+            with open(f"{destination_path}/{session}_{counter}.{file_upload.filename.split('.')[-1]}", "wb") as file:
+                # Write the bytes to the file
+                file.write(await file_upload.read())
+    print("Before call queue")
+    # Connect to the RabbitMQ server
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters("localhost"))
+    channel = connection.channel()
+    # Declare the queue
+    channel.queue_declare(queue="train_photos")
+    channel.basic_publish(
+        exchange="", routing_key="train_photos", body=session)
+    channel.close()
+
+    return {"filenames": [file.filename for file in files],  "session": session}
+
+
+@app.get("/sessions/")
+def list_sessions():
+    # Get the list of directories in the models folder
+    sessions = [d for d in os.listdir(
+        "models") if os.path.isdir(os.path.join("models", d))]
+    # Return the list as a JSON response
+    return {"sessions": sessions}
+
+
+@app.get("/test-queue/")
+def test_queue():
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters("localhost"))
+    channel = connection.channel()
+    channel.queue_declare(queue="train_photos")
+    channel.basic_publish(
+        exchange="", routing_key="train_photos", body="emanuele")
+    channel.close()
+
+
+@app.get("/")
+async def main():
+    content = """
+<body>
+<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+<input name="session" type="text">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
+
+# launch with uvicorn server:app --reload
