@@ -1,5 +1,6 @@
 from glob import glob
 import os
+import random
 import torch
 from torch import autocast
 from diffusers import StableDiffusionPipeline, DDIMScheduler
@@ -9,14 +10,16 @@ Root = os.getcwd()
 
 
 def generate(session_name: str):
-    MODEL_dIR = os.path.join(Root, "models", session_name)
+    MODEL_DIR = os.path.join(Root, "models", session_name)
     OUTPUT_DIR = os.path.join(Root, "sessions", session_name, "output")
 
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
     # If you want to use previously trained model saved in gdrive, replace this with the full path of model in gdrive
-    model_path = MODEL_dIR
+    os.symlink(os.path.join(Root, "sessions", session_name, session_name + ".ckpt"),
+                   os.path.join(MODEL_DIR, session_name + ".ckpt"))
+    model_path = MODEL_DIR
 
     scheduler = DDIMScheduler(beta_start=0.00085, beta_end=0.012,
                               beta_schedule="scaled_linear", clip_sample=False, set_alpha_to_one=False)
@@ -27,12 +30,12 @@ def generate(session_name: str):
 
     # @markdown Can set random seed here for reproducibility.
     g_cuda = torch.Generator(device='cuda')
-    seed = 52362  # @param {type:"number"}
+    seed = random.randint(1, 999999)  # @param {type:"number"}
     g_cuda.manual_seed(seed)
 
     # @title Run for generating images.
 
-    prompt = f"photo of {session_name} beautiful"  # @param {type:"string"}
+    prompt = f"{session_name}"  # @param {type:"string"}
     negative_prompt = ""  # @param {type:"string"}
     num_samples = 1  # @param {type:"number"}
     guidance_scale = 7.5  # @param {type:"number"}
@@ -52,5 +55,7 @@ def generate(session_name: str):
             generator=g_cuda
         ).images
 
+    start_index = len(os.listdir(OUTPUT_DIR))
     for index, img in enumerate(images):
-        img.save(os.path.join(OUTPUT_DIR, str(index) + ".jpg"))
+        img.save(os.path.join(OUTPUT_DIR, str(
+            start_index + index) + "_" + str(seed) + ".jpg"))

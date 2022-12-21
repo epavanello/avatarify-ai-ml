@@ -3,6 +3,14 @@
 wget -O scripts/convert_diffusers_to_original_stable_diffusion.py https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
 # wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
 
+wget -O Womenz 'https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/Regularization/Women'
+wget -O sessions/emanuele/Regularization_images/Men 'https://github.com/TheLastBen/fast-stable-diffusion/raw/3eefcbbaed86ed31c5deb407ced9cf3070d0a2ab/Dreambooth/Regularization/Men'
+wget -O Mixz 'https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/Regularization/Mix'
+unzip Menz
+unzip Womenz
+unzip Mixz
+
+
 sudo apt update && sudo apt install python3-pip git-lfs rabbitmq-server
 
 pip install git+https://github.com/ShivamShrirao/diffusers

@@ -48,6 +48,30 @@ def train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_D
         max_train_steps=Training_Steps)
 
 
+def txtenc_train(MODELT_NAME, INSTANCE_DIR, CLASS_DIR, OUTPUT_DIR, PT, Seed, precision, GC, Training_Steps):
+    print('[1;33mTraining the text encoder with regularization...[0m')
+    train_dreambooth.Run(
+        pretrained_model_name_or_path=MODELT_NAME,
+        instance_data_dir=INSTANCE_DIR,
+        class_data_dir=CLASS_DIR,
+        output_dir=OUTPUT_DIR,
+        with_prior_preservation=True,
+        prior_loss_weight=1.0,
+        instance_prompt=PT,
+        seed=Seed,
+        resolution=512,
+        mixed_precision=precision,
+        train_batch_size=1,
+        gradient_accumulation_steps=1,
+        use_8bit_adam=True,
+        learning_rate=2e-6,
+        lr_scheduler="polynomial",
+        lr_warmup_steps=0,
+        max_train_steps=Training_Steps,
+        num_class_images=200
+    )
+
+
 def train(session_name: str):
     MODEL_NAME = os.path.join(Root, "stable-diffusion-v1-5")
     PT = ""
@@ -56,6 +80,7 @@ def train(session_name: str):
     SESSION_DIR = os.path.join(Root, 'sessions', session_name)
     INSTANCE_DIR = os.path.join(SESSION_DIR, 'instance_images')
     MDLPTH = os.path.join(SESSION_DIR, session_name+'.ckpt')
+    CLASS_DIR = os.path.join(SESSION_DIR, 'Regularization_images')
 
     os.makedirs(INSTANCE_DIR, exist_ok=True)
     print('Session created, proceed to uploading instance images')
@@ -115,14 +140,24 @@ def train(session_name: str):
     create_symlink('vae', OUTPUT_DIR)
     create_symlink('model_index.json', OUTPUT_DIR)
 
-    if Text_Encoder_Training_Steps > 0:
-        dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
-                          PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+    # if Contains_faces != "No":
+    #     if Enable_text_encoder_training:
+    #         txtenc_train(MODELT_NAME, INSTANCE_DIR, CLASS_DIR, OUTPUT_DIR,
+    #                      PT, Seed, precision, GC, Training_Steps=stptxt)
+    #     unet_train(SESSION_DIR, stpsv, stp, MODELT_NAME, INSTANCE_DIR,
+    #                OUTPUT_DIR, PT, Seed, Res, precision, GC, Training_Steps)
 
-    Start_saving_from_the_step = 500
+    txtenc_train(MODEL_NAME, INSTANCE_DIR, CLASS_DIR, OUTPUT_DIR,
+                 PT, Seed, precision, "", Training_Steps=UNet_Training_Steps)
 
-    train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
-                    OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
+    # if Text_Encoder_Training_Steps > 0:
+    #     dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
+    #                       PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+
+    # Start_saving_from_the_step = 500
+
+    # train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
+    #                 OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
     convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_name)
 
