@@ -13,7 +13,11 @@ channel.queue_declare(queue='train_photos')
 
 def callback(_channel, _method, _properties, body: bytes):
     print(f"Train session: {body.decode()}")
-    train.train(body.decode())
+    try:
+        train.train(body.decode())
+        print("Completed training")
+    finally:
+        pass
 
 
 # Sottoscriversi alla coda e specificare la funzione di callback da utilizzare per i messaggi ricevuti

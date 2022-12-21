@@ -81,14 +81,16 @@ def train(session_Name):
                     image.save(filepath, format=extension.upper())
 
     # prepare training
-    UNet_Training_Steps = len(files) * 100
+    # TODO restore: It was * 100
+    UNet_Training_Steps = len(files) * 1
     Seed = random.randint(1, 999999)
     fp16 = True
     if fp16:
         prec = "fp16"
     else:
         prec = "no"
-    Text_Encoder_Training_Steps = 350
+    # TODO restore: It was 350
+    Text_Encoder_Training_Steps = 0
     Resolution = 512
 
     s = getoutput('nvidia-smi')
@@ -98,11 +100,24 @@ def train(session_Name):
         precision = prec
     prc = "--fp16" if precision == "fp16" else ""
 
-    if os.path.exists(OUTPUT_DIR+'/'+'text_encoder_trained'):
-        shutil.rmtree(OUTPUT_DIR + "/text_encoder_trained")
+    if os.path.exists(os.path.join(OUTPUT_DIR, 'text_encoder_trained')):
+        shutil.rmtree(os.path.join(OUTPUT_DIR, 'text_encoder_trained'))
 
-    dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
-                        PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
+    create_symlink('models', OUTPUT_DIR)
+    create_symlink('scheduler', OUTPUT_DIR)
+    create_symlink('sessions', OUTPUT_DIR)
+    create_symlink('text_encoder', OUTPUT_DIR)
+    create_symlink('tokenizer', OUTPUT_DIR)
+    create_symlink('unet', OUTPUT_DIR)
+    create_symlink('vae', OUTPUT_DIR)
+    create_symlink('model_index.json', OUTPUT_DIR)
+
+    if Text_Encoder_Training_Steps > 0:
+        dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
+                          PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
 
     Start_saving_from_the_step = 500
 
@@ -110,3 +125,9 @@ def train(session_Name):
                     OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
     convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_Name)
+
+
+def create_symlink(name: str, destination_dir: str):
+    if not os.path.exists(os.path.join(destination_dir, name)):
+        os.symlink(os.path.join(Root, "stable-diffusion-v1-5", name),
+                   os.path.join(destination_dir, name))

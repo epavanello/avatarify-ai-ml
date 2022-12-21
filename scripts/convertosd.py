@@ -224,3 +224,4 @@ def Run(output_dir: str, session_dir: str, session_name: str):
     state_dict = {k:v.half() for k,v in state_dict.items()}
     state_dict = {"state_dict": state_dict}
     torch.save(state_dict, checkpoint_path)
+    print("Saved on: " + checkpoint_path)    
