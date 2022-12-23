@@ -35,7 +35,7 @@ def generate(session_name: str):
 
     # @title Run for generating images.
 
-    prompt = f"{session_name}"  # @param {type:"string"}
+    prompt = f"ejxjo"  # @param {type:"string"}
     negative_prompt = ""  # @param {type:"string"}
     num_samples = 1  # @param {type:"number"}
     guidance_scale = 7.5  # @param {type:"number"}

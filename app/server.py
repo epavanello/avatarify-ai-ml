@@ -48,7 +48,7 @@ async def upload_files(files: List[UploadFile], session: str = Form()):
             # Increment the counter
             counter += 1
             # Save the file to the directory with the session and counter in the filename
-            with open(f"{destination_path}/{session}_{counter}.{file_upload.filename.split('.')[-1]}", "wb") as file:
+            with open(f"{destination_path}/ejxjo_{counter}.{file_upload.filename.split('.')[-1]}", "wb") as file:
                 # Write the bytes to the file
                 file.write(await file_upload.read())
     print("Before call queue")
