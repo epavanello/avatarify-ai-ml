@@ -147,15 +147,17 @@ def train(session_name: str):
     #     unet_train(SESSION_DIR, stpsv, stp, MODELT_NAME, INSTANCE_DIR,
     #                OUTPUT_DIR, PT, Seed, Res, precision, GC, Training_Steps)
 
+    
     txtenc_train(MODEL_NAME, INSTANCE_DIR, CLASS_DIR, OUTPUT_DIR,
                  PT, Seed, precision, "", Training_Steps=UNet_Training_Steps)
 
-    # if Text_Encoder_Training_Steps > 0:
-    #     dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
-    #                       PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
+    # Training text encoder
+    # dump_only_textenc(MODEL_NAME, INSTANCE_DIR, OUTPUT_DIR,
+    #                 PT, None, precision, Training_Steps=Text_Encoder_Training_Steps)
 
     # Start_saving_from_the_step = 500
 
+    # Training the UNet
     # train_only_unet(Start_saving_from_the_step, 0, SESSION_DIR, MODEL_NAME, INSTANCE_DIR,
     #                 OUTPUT_DIR, PT, Seed, Resolution, precision, Training_Steps=UNet_Training_Steps)
 
