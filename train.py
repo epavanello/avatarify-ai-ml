@@ -1,40 +1,15 @@
 import os
 import random
 import shutil
+import subprocess
 from PIL import Image
 from subprocess import getoutput
 from scripts import convertosd
-from scripts import train_dreambooth
-from scripts import train_dreambooth_new
 
 Root = os.getcwd()
 
 Crop_images = True
 Crop_size = 512
-
-
-def txtenc_train(MODELT_NAME, INSTANCE_DIR, CLASS_DIR, OUTPUT_DIR, PT, Seed, precision, GC, Training_Steps):
-    print('[1;33mTraining the text encoder with regularization...[0m')
-    train_dreambooth.Run(
-        pretrained_model_name_or_path=MODELT_NAME,
-        instance_data_dir=INSTANCE_DIR,
-        class_data_dir=CLASS_DIR,
-        output_dir=OUTPUT_DIR,
-        with_prior_preservation=True,
-        prior_loss_weight=1.0,
-        instance_prompt=PT,
-        seed=Seed,
-        resolution=512,
-        mixed_precision=precision,
-        train_batch_size=1,
-        gradient_accumulation_steps=1,
-        use_8bit_adam=True,
-        learning_rate=2e-6,
-        lr_scheduler="polynomial",
-        lr_warmup_steps=0,
-        max_train_steps=Training_Steps,
-        num_class_images=200
-    )
 
 
 def train(session_name: str):
@@ -73,8 +48,9 @@ def train(session_name: str):
     # prepare training
     # TODO restore: It was * 100
     UNet_Training_Steps = len(files) * 100
-    UNet_Learning_Rate = 2e-6 #@param ["1e-6","2e-6","3e-6","4e-6","5e-6"] {type:"raw"}
-    untlr=UNet_Learning_Rate
+    # @param ["1e-6","2e-6","3e-6","4e-6","5e-6"] {type:"raw"}
+    UNet_Learning_Rate = 2e-6
+    untlr = UNet_Learning_Rate
     Seed = random.randint(1, 999999)
 
     # @param ["1e-6","8e-7","6e-7","5e-7","4e-7"] {type:"raw"}
@@ -118,60 +94,60 @@ def train(session_name: str):
     create_symlink('vae', OUTPUT_DIR)
     create_symlink('model_index.json', OUTPUT_DIR)
 
+    # 70 was Train_text_encoder_for > https://bytexd.com/how-to-use-dreambooth-to-fine-tune-stable-diffusion-colab/
+    stptxt=int((UNet_Training_Steps*70)/100)
+
     # Training text encoder
     # dump_only_textenc()
-    train_dreambooth_new.Run(
-        train_dreambooth_new.Get_args().parse_args([
-            "--image_captions_filename",
-            "--train_text_encoder",
-            "--dump_only_text_encoder",
-            f"--pretrained_model_name_or_path=\"{MODEL_NAME}\"",
-            f"--instance_data_dir=\"{INSTANCE_DIR}\"",
-            f"--output_dir=\"{OUTPUT_DIR}\"",
-            f"--instance_prompt=\"{PT}\"",
-            f"--seed={Seed}",
-            "--resolution=512",
-            f"--mixed_precision={precision}",
-            "--train_batch_size=1",
-            "--gradient_accumulation_steps=1",
-            GC,
-            "--use_8bit_adam",
-            f"--learning_rate={txlr}",
-            "--lr_scheduler=\"polynomial\"",
-            "--lr_warmup_steps=0",
-            f"--max_train_steps={Text_Encoder_Training_Steps}"
-        ])
-    )
+    subprocess.run(["python3", os.path.join("scripts", "train_dreambooth_new.py")] + [
+        "--image_captions_filename",
+        "--train_text_encoder",
+        "--dump_only_text_encoder",
+        f"--pretrained_model_name_or_path={MODEL_NAME}",
+        f"--instance_data_dir={INSTANCE_DIR}",
+        f"--output_dir={OUTPUT_DIR}",
+        f"--instance_prompt={PT}",
+        f"--seed={Seed}",
+        "--resolution=512",
+        f"--mixed_precision={precision}",
+        "--train_batch_size=1",
+        "--gradient_accumulation_steps=1",
+        GC,
+        "--use_8bit_adam",
+        f"--learning_rate={txlr}",
+        "--lr_scheduler=polynomial",
+        "--lr_warmup_steps=0",
+        f"--max_train_steps={stptxt}" # brfore was Text_Encoder_Training_Steps=350
+    ])
 
     Start_saving_from_the_step = 500
+    Save_Checkpoint_Every = 0
 
     # Training the UNet
     # train_only_unet
     # def train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT, Seed, Res, precision, Training_Steps):
-    train_dreambooth_new.Run(
-        train_dreambooth_new.Get_args().parse_args([
-            "--image_captions_filename",
-            "--train_only_unet",
-            "--save_starting_step=$stpsv",
-            "--save_n_steps=$stp",
-            "--Session_dir=$SESSION_DIR",
-            f"--pretrained_model_name_or_path=\"{MODEL_NAME}\"",
-            f"--instance_data_dir=\"{INSTANCE_DIR}\"",
-            f"--output_dir=\"{OUTPUT_DIR}\"",
-            f"--instance_prompt=\"{PT}\"",
-            f"--seed={Seed}",
-            f"--resolution={Res}",
-            f"--mixed_precision={precision}",
-            "--train_batch_size=1",
-            "--gradient_accumulation_steps=1",
-            GC,
-            "--use_8bit_adam",
-            f"--learning_rate={untlr}",
-            "--lr_scheduler=\"polynomial\"",
-            "--lr_warmup_steps=0",
-            f"--max_train_steps={UNet_Training_Steps}"
-        ])
-    )
+    subprocess.run(["python3", os.path.join("scripts", "train_dreambooth_new.py")] + [
+        "--image_captions_filename",
+        "--train_only_unet",
+        f"--save_starting_step={Start_saving_from_the_step}",
+        f"--save_n_steps={Save_Checkpoint_Every}",
+        f"--Session_dir={SESSION_DIR}",
+        f"--pretrained_model_name_or_path={MODEL_NAME}",
+        f"--instance_data_dir={INSTANCE_DIR}",
+        f"--output_dir={OUTPUT_DIR}",
+        f"--instance_prompt={PT}",
+        f"--seed={Seed}",
+        f"--resolution={Resolution}",
+        f"--mixed_precision={precision}",
+        "--train_batch_size=1",
+        "--gradient_accumulation_steps=1",
+        GC,
+        "--use_8bit_adam",
+        f"--learning_rate={untlr}",
+        "--lr_scheduler=polynomial",
+        "--lr_warmup_steps=0",
+        f"--max_train_steps={UNet_Training_Steps}"
+    ])
 
     convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_name)
 

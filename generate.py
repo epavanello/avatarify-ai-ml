@@ -17,7 +17,10 @@ def generate(session_name: str):
         os.makedirs(OUTPUT_DIR)
 
     # If you want to use previously trained model saved in gdrive, replace this with the full path of model in gdrive
-    os.symlink(os.path.join(Root, "sessions", session_name, session_name + ".ckpt"),
+    session_ckpt_link_path = os.path.join(
+        Root, "sessions", session_name, session_name + ".ckpt")
+    if not os.path.exists(session_ckpt_link_path):
+        os.symlink(session_ckpt_link_path,
                    os.path.join(MODEL_DIR, session_name + ".ckpt"))
     model_path = MODEL_DIR
 
