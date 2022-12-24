@@ -1,13 +1,9 @@
-import pika
 import train
 import generate
+import rabbitmq
 
-# Creare una connessione a RabbitMQ
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+connection = rabbitmq.get_connection()
 channel = connection.channel()
-
-# Dichiarare una coda a cui il consumer si sottoscriverà
-channel.queue_declare(queue='train_photos')
 
 # Definire una funzione di callback per il consumer
 

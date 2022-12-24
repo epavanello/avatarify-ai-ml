@@ -6,6 +6,8 @@ import pika
 from pika.adapters.blocking_connection import BlockingChannel
 from typing import List
 
+import rabbitmq
+
 app = FastAPI()
 
 CONNECTION: pika.BlockingConnection
@@ -16,8 +18,8 @@ CHANNEL: BlockingChannel
 async def startup_event():
     global CONNECTION
     print("Open queue connection")
-    CONNECTION = pika.BlockingConnection(
-        pika.ConnectionParameters("localhost"))
+
+    CONNECTION = rabbitmq.get_connection()
     global CHANNEL
     CHANNEL = CONNECTION.channel()
     CHANNEL.queue_declare(queue="train_photos", durable=True)

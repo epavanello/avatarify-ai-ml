@@ -8,7 +8,7 @@
             "name": "Python: Rabbbit queue",
             "type": "python",
             "request": "launch",
-            "program": "rabbitmq_queue.py",
+            "program": "queue.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }

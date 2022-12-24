@@ -2,3 +2,4 @@ stable-diffusion-v1-5/
 models/
 sessions/
 __pycache__/
+.env
