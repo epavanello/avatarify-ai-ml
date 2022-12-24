@@ -20,8 +20,8 @@ async def startup_event():
         pika.ConnectionParameters("localhost"))
     global CHANNEL
     CHANNEL = CONNECTION.channel()
-    CHANNEL.queue_declare(queue="train_photos")
-    CHANNEL.queue_declare(queue="generate_photos")
+    CHANNEL.queue_declare(queue="train_photos", durable=True)
+    CHANNEL.queue_declare(queue="generate_photos", durable=True)
     print("Queue declared")
 
 

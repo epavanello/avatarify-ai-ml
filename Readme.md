@@ -2,9 +2,10 @@
 
 ## Cli
 
-- Start rabbitmq `sudo rabbitmq-server`
+- Start rabbitmq `sudo rabbitmq-server -detached`
 - Stop rabbitmq `sudo rabbitmqctl stop`
 - list rabbitmq queues `sudo rabbitmqctl list_queues`
+- Declare queues `rabbitmqadmin declare queue name=train_photos durable=true` `rabbitmqadmin declare queue name=generate_photos durable=true`
 - Dev Launch FastAPI `uvicorn app.server:app --reload`
 - Dev launch rabbit queue `python rabbitmq_queue.py`
 - Test new queue message `rabbitmqadmin -u guest -p guest publish routing_key="train_photos" payload="test"`
