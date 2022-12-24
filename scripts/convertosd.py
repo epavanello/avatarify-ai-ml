@@ -194,10 +194,23 @@ def convert_vae_state_dict(vae_state_dict):
 def convert_text_enc_state_dict(text_enc_dict):
     return text_enc_dict
 
+def main():
+    parser = argparse.ArgumentParser(
+        description="Simple example of a training script.")
+    parser.add_argument(
+        "--model_path",
+        type=str,
+        required=True
+    ).add_argument(
+        "--checkpoint_path",
+        type=str,
+        required=True
+    )
 
-def Run(output_dir: str, session_dir: str, session_name: str):
-    model_path = output_dir
-    checkpoint_path= f"{session_dir}/{session_name}.ckpt"
+    args = parser.parse_args()
+
+    model_path = args.model_path
+    checkpoint_path= args.checkpoint_path
     
     unet_path = osp.join(model_path, "unet", "diffusion_pytorch_model.bin")
     vae_path = osp.join(model_path, "vae", "diffusion_pytorch_model.bin")
@@ -225,3 +238,6 @@ def Run(output_dir: str, session_dir: str, session_name: str):
     state_dict = {"state_dict": state_dict}
     torch.save(state_dict, checkpoint_path)
     print("Saved on: " + checkpoint_path)    
+
+if __name__ == "__main__":
+    main()

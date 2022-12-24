@@ -95,11 +95,11 @@ def train(session_name: str):
     create_symlink('model_index.json', OUTPUT_DIR)
 
     # 70 was Train_text_encoder_for > https://bytexd.com/how-to-use-dreambooth-to-fine-tune-stable-diffusion-colab/
-    stptxt=int((UNet_Training_Steps*70)/100)
+    stptxt = int((UNet_Training_Steps*70)/100)
 
     # Training text encoder
     # dump_only_textenc()
-    subprocess.run(["python3", os.path.join("scripts", "train_dreambooth_new.py")] + [
+    subprocess.run(["python3", os.path.join("scripts", "train_dreambooth.py")] + [
         "--image_captions_filename",
         "--train_text_encoder",
         "--dump_only_text_encoder",
@@ -117,16 +117,16 @@ def train(session_name: str):
         f"--learning_rate={txlr}",
         "--lr_scheduler=polynomial",
         "--lr_warmup_steps=0",
-        f"--max_train_steps={stptxt}" # brfore was Text_Encoder_Training_Steps=350
-    ])
+        # brfore was Text_Encoder_Training_Steps=350
+        f"--max_train_steps={stptxt}"
+    ], check=True)
 
     Start_saving_from_the_step = 500
     Save_Checkpoint_Every = 0
 
     # Training the UNet
     # train_only_unet
-    # def train_only_unet(stpsv, stp, SESSION_DIR, MODELT_NAME, INSTANCE_DIR, OUTPUT_DIR, PT, Seed, Res, precision, Training_Steps):
-    subprocess.run(["python3", os.path.join("scripts", "train_dreambooth_new.py")] + [
+    subprocess.run(["python3", os.path.join("scripts", "train_dreambooth.py")] + [
         "--image_captions_filename",
         "--train_only_unet",
         f"--save_starting_step={Start_saving_from_the_step}",
@@ -147,9 +147,13 @@ def train(session_name: str):
         "--lr_scheduler=polynomial",
         "--lr_warmup_steps=0",
         f"--max_train_steps={UNet_Training_Steps}"
-    ])
+    ], check=True)
 
-    convertosd.Run(OUTPUT_DIR, SESSION_DIR, session_name)
+    checkpoint_path = os.path.join(SESSION_DIR, session_name + ".ckpt")
+    subprocess.run(["python3", os.path.join("scripts", "convertosd.py")] + [
+        f"--model_path={OUTPUT_DIR}",
+        f"--checkpoint_path={checkpoint_path}",
+    ], check=True)
 
 
 def create_symlink(name: str, destination_dir: str):
