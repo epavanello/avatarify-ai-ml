@@ -11,7 +11,8 @@ def callback(_channel, method, properties, _body):
     try:
         generate.generate(session)
         print("Generation complete")
-    except:
+    except Exception as e:
+        print(e)
         pass
     finally:
         pass

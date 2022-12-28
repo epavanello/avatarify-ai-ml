@@ -17,7 +17,8 @@ def callback(_channel, method, properties, body: bytes):
 
         train.train(session, images)
         print("Completed training")
-    except:
+    except Exception as e:
+        print(e)
         pass
     finally:
         pass
