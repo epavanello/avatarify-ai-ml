@@ -4,13 +4,18 @@ import random
 import torch
 from torch import autocast
 from diffusers import StableDiffusionPipeline, DDIMScheduler
+from supabase import create_client, Client
+import config
 
-from natsort import natsorted
 Root = os.getcwd()
 
 
 def generate(session_name: str):
     MODEL_DIR = os.path.join(Root, "models", session_name)
+
+    conf = config.Settings()
+    supabase: Client = create_client(conf.supabase_url, conf.supabase_key)
+
     OUTPUT_DIR = os.path.join(Root, "sessions", session_name, "output")
 
     if not os.path.exists(OUTPUT_DIR):
@@ -58,7 +63,17 @@ def generate(session_name: str):
             generator=g_cuda
         ).images
 
-    start_index = len(os.listdir(OUTPUT_DIR))
+    start_index = len(supabase.storage().get_bucket(
+        "photos-generated").list(session_name))
     for index, img in enumerate(images):
-        img.save(os.path.join(OUTPUT_DIR, str(
-            start_index + index) + "_" + str(seed) + ".jpg"))
+        # Do not use here path.join because under windows \ break the api
+        # Add style name
+        filename = str(start_index + index) + "_" + str(seed) + ".jpg"
+        filepath_tmp = os.path.join(OUTPUT_DIR, filename)
+
+        img.save(filepath_tmp)
+        resp = supabase.storage().get_bucket("photos-generated").upload(session_name + "/" + filename,
+                                                                        filepath_tmp)
+        os.remove(filepath_tmp)
+        assert resp.is_success
+

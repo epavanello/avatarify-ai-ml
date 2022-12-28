@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "train_photos_queue.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "Python: Generate photos queue",
@@ -18,7 +18,15 @@
             "request": "launch",
             "program": "Generate_photos_queue.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Train and generate photos queue",
+            "type": "python",
+            "request": "launch",
+            "program": "train_and_geerate_queue.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
