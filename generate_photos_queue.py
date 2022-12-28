@@ -19,10 +19,11 @@ class Images(BaseModel):
     __root__: List[Image]
 
 
-def callback(_channel, method, _properties, body: bytes):
-    print(f"Generate image for session: {body.decode()}")
+def callback(_channel, method, properties, _body):
+    session = properties.headers["session"]
+    print(f"Generate image for session: {session}")
     try:
-        generate.generate(body.decode())
+        generate.generate(session)
         print("Generation complete")
     finally:
         pass
