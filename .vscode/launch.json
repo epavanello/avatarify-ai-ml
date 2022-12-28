@@ -5,10 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Rabbbit queue",
+            "name": "Python: Train photos queue",
             "type": "python",
             "request": "launch",
-            "program": "queue.py",
+            "program": "train_photos_queue.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Generate photos queue",
+            "type": "python",
+            "request": "launch",
+            "program": "Generate_photos_queue.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
