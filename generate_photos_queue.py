@@ -1,15 +1,21 @@
-import json
 from pydantic import BaseModel
-from typing import List
 import generate
 import rabbitmq
+from typing import Optional
 
 
-def callback(_channel, method, properties, _body):
+class GeneratePayload(BaseModel):
+    theme: str
+    prompt: str
+    seed: Optional[int]
+
+
+def callback(_channel, method, properties, body: bytes):
     session = properties.headers["session"]
     print(f"Generate image for session: {session}")
     try:
-        generate.generate(session)
+        payload = GeneratePayload.parse_raw(body)
+        generate.generate(session, payload.theme, payload.prompt, payload.seed)
         print("Generation complete")
     except Exception as e:
         print(e)

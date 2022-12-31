@@ -14,7 +14,8 @@ def get_connection():
     parameters = pika.ConnectionParameters(host=conf.rabbitmq_host,
                                            port=conf.rabbitmq_port,
                                            credentials=credentials,
-                                           ssl_options=pika.SSLOptions(context))
+                                           ssl_options=pika.SSLOptions(context),
+                                           heartbeat=0)
 
     # Creare una connessione a RabbitMQ
     return pika.BlockingConnection(parameters)

@@ -16,7 +16,7 @@
             "name": "Python: Generate photos queue",
             "type": "python",
             "request": "launch",
-            "program": "Generate_photos_queue.py",
+            "program": "generate_photos_queue.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },

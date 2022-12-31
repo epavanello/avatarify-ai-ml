@@ -201,7 +201,8 @@ def main():
         "--model_path",
         type=str,
         required=True
-    ).add_argument(
+    )
+    parser.add_argument(
         "--checkpoint_path",
         type=str,
         required=True

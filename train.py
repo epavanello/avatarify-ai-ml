@@ -23,13 +23,12 @@ class TrainImage(BaseModel):
 
 
 def train(session_name: str, images: List[TrainImage]):
-    MODEL_NAME = os.path.join(Root, "stable-diffusion-v1-5")
     PT = ""
     INSTANCE_NAME = session_name
     OUTPUT_DIR = os.path.join(Root, "models", session_name)
     SESSION_DIR = os.path.join(Root, 'sessions', session_name)
     INSTANCE_DIR = os.path.join(SESSION_DIR, 'instance_images')
-    MDLPTH = os.path.join(SESSION_DIR, session_name+'.ckpt')
+    MDLPTH = os.path.join(SESSION_DIR, session_name + '.ckpt')
     CLASS_DIR = os.path.join(SESSION_DIR, 'Regularization_images')
 
     if os.path.exists(INSTANCE_DIR):
@@ -37,7 +36,7 @@ def train(session_name: str, images: List[TrainImage]):
     os.makedirs(INSTANCE_DIR, exist_ok=True)
     print('Session created, proceed to uploading instance images')
 
-    for image in images:
+    for index, image in enumerate(images):
         extension = image.filename.split(".")[-1]
         file = Image.open(io.BytesIO(base64.b64decode(image.base64)))
         width, height = file.size
@@ -50,11 +49,11 @@ def train(session_name: str, images: List[TrainImage]):
             file = file.crop((left, top, right, bottom))
             file = file.resize((Crop_size, Crop_size))
         if (extension.upper() == "JPG"):
-            file.save(os.path.join(INSTANCE_DIR, image.filename),
-                        format="JPEG", quality=100)
+            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + "_" + str(index + 1) + ".jpg"),
+                      format="JPEG", quality=100)
         else:
-            file.save(os.path.join(INSTANCE_DIR, image.filename),
-                        format=extension.upper())
+            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + "_" + str(index + 1) + "." + extension),
+                      format=extension.upper())
 
     # prepare training
     # TODO restore: It was * 100
@@ -96,14 +95,14 @@ def train(session_name: str, images: List[TrainImage]):
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    create_symlink('models', OUTPUT_DIR)
-    create_symlink('scheduler', OUTPUT_DIR)
-    create_symlink('sessions', OUTPUT_DIR)
-    create_symlink('text_encoder', OUTPUT_DIR)
-    create_symlink('tokenizer', OUTPUT_DIR)
-    create_symlink('unet', OUTPUT_DIR)
-    create_symlink('vae', OUTPUT_DIR)
-    create_symlink('model_index.json', OUTPUT_DIR)
+    os.makedirs(os.path.join(OUTPUT_DIR, "models"), exist_ok=True)
+    os.makedirs(os.path.join(OUTPUT_DIR, "sessions"), exist_ok=True)
+    copy('scheduler', OUTPUT_DIR)
+    copy('text_encoder', OUTPUT_DIR)
+    copy('tokenizer', OUTPUT_DIR)
+    copy('unet', OUTPUT_DIR)
+    copy('vae', OUTPUT_DIR)
+    copy('model_index.json', OUTPUT_DIR)
 
     # 70 was Train_text_encoder_for > https://bytexd.com/how-to-use-dreambooth-to-fine-tune-stable-diffusion-colab/
     stptxt = int((UNet_Training_Steps*70)/100)
@@ -114,7 +113,7 @@ def train(session_name: str, images: List[TrainImage]):
         "--image_captions_filename",
         "--train_text_encoder",
         "--dump_only_text_encoder",
-        f"--pretrained_model_name_or_path={MODEL_NAME}",
+        f"--pretrained_model_name_or_path={OUTPUT_DIR}",
         f"--instance_data_dir={INSTANCE_DIR}",
         f"--output_dir={OUTPUT_DIR}",
         f"--instance_prompt={PT}",
@@ -143,7 +142,7 @@ def train(session_name: str, images: List[TrainImage]):
         f"--save_starting_step={Start_saving_from_the_step}",
         f"--save_n_steps={Save_Checkpoint_Every}",
         f"--Session_dir={SESSION_DIR}",
-        f"--pretrained_model_name_or_path={MODEL_NAME}",
+        f"--pretrained_model_name_or_path={OUTPUT_DIR}",
         f"--instance_data_dir={INSTANCE_DIR}",
         f"--output_dir={OUTPUT_DIR}",
         f"--instance_prompt={PT}",
@@ -160,7 +159,7 @@ def train(session_name: str, images: List[TrainImage]):
         f"--max_train_steps={UNet_Training_Steps}"
     ], check=True)
 
-    checkpoint_path = os.path.join(SESSION_DIR, session_name + ".ckpt")
+    checkpoint_path = os.path.join(OUTPUT_DIR, session_name + ".ckpt")
     subprocess.run(["python3", os.path.join("scripts", "convertosd.py")] + [
         f"--model_path={OUTPUT_DIR}",
         f"--checkpoint_path={checkpoint_path}",
@@ -171,3 +170,14 @@ def create_symlink(name: str, destination_dir: str):
     if not os.path.exists(os.path.join(destination_dir, name)):
         os.symlink(os.path.join(Root, "stable-diffusion-v1-5", name),
                    os.path.join(destination_dir, name))
+
+
+def copy(name: str, destination_dir: str):
+    from_path = os.path.join(Root, "stable-diffusion-v1-5", name)
+    to_path = os.path.join(destination_dir, name)
+    if os.path.isdir(from_path):
+        if os.path.exists(to_path):
+            shutil.rmtree(to_path)
+        shutil.copytree(from_path, to_path)
+    else:
+        shutil.copy(from_path, to_path)

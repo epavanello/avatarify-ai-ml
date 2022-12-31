@@ -1,4 +1,3 @@
-from glob import glob
 import os
 import random
 import torch
@@ -6,11 +5,12 @@ from torch import autocast
 from diffusers import StableDiffusionPipeline, DDIMScheduler
 from supabase import create_client, Client
 import config
+from typing import Optional
 
 Root = os.getcwd()
 
 
-def generate(session_name: str):
+def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
     MODEL_DIR = os.path.join(Root, "models", session_name)
 
     conf = config.Settings()
@@ -25,8 +25,8 @@ def generate(session_name: str):
     session_ckpt_link_path = os.path.join(
         Root, "sessions", session_name, session_name + ".ckpt")
     if not os.path.exists(session_ckpt_link_path):
-        os.symlink(session_ckpt_link_path,
-                   os.path.join(MODEL_DIR, session_name + ".ckpt"))
+        os.symlink(os.path.join(MODEL_DIR, session_name + ".ckpt"),
+                   session_ckpt_link_path)
     model_path = MODEL_DIR
 
     scheduler = DDIMScheduler(beta_start=0.00085, beta_end=0.012,
@@ -38,12 +38,12 @@ def generate(session_name: str):
 
     # @markdown Can set random seed here for reproducibility.
     g_cuda = torch.Generator(device='cuda')
-    seed = random.randint(1, 999999)  # @param {type:"number"}
+    seed = seed or random.randint(1, 999999)  # @param {type:"number"}
     g_cuda.manual_seed(seed)
 
     # @title Run for generating images.
 
-    prompt = f"ejxjo"  # @param {type:"string"}
+    prompt = prompt  # f"ejxjo"  # @param {type:"string"}
     negative_prompt = ""  # @param {type:"string"}
     num_samples = 1  # @param {type:"number"}
     guidance_scale = 7.5  # @param {type:"number"}
@@ -63,17 +63,19 @@ def generate(session_name: str):
             generator=g_cuda
         ).images
 
-    start_index = len(supabase.storage().get_bucket(
-        "photos-generated").list(session_name))
+    photos_generated = supabase.storage().get_bucket(
+        "photos-generated")
+
+    start_index = len(photos_generated.list(session_name))
+
     for index, img in enumerate(images):
         # Do not use here path.join because under windows \ break the api
         # Add style name
-        filename = str(start_index + index) + "_" + str(seed) + ".jpg"
+        filename = theme + "_" + str(seed) + ".jpg"
         filepath_tmp = os.path.join(OUTPUT_DIR, filename)
 
         img.save(filepath_tmp)
-        resp = supabase.storage().get_bucket("photos-generated").upload(session_name + "/" + filename,
-                                                                        filepath_tmp)
+        resp = photos_generated.upload(session_name + "/" + str(start_index + index + 1) + "_" + filename,
+                                       filepath_tmp)
         os.remove(filepath_tmp)
         assert resp.is_success
-
