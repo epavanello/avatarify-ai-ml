@@ -49,10 +49,10 @@ def train(session_name: str, images: List[TrainImage]):
             file = file.crop((left, top, right, bottom))
             file = file.resize((Crop_size, Crop_size))
         if (extension.upper() == "JPG"):
-            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + "_" + str(index + 1) + ".jpg"),
+            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + " (" + str(index + 1) + ").jpg"),
                       format="JPEG", quality=100)
         else:
-            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + "_" + str(index + 1) + "." + extension),
+            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + " (" + str(index + 1) + ")." + extension),
                       format=extension.upper())
 
     # prepare training

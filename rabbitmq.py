@@ -68,4 +68,14 @@ def Run(queues: List[str], do_work):
 
     # Avviare il consumer in modalità blocking, in attesa di ricevere messaggi
     print('In attesa di ricevere messaggi...')
-    channel.start_consuming()
+        
+    try:
+        channel.start_consuming()
+    except KeyboardInterrupt:
+        channel.stop_consuming()
+
+    # Wait for all to complete
+    for thread in threads:
+        thread.join()
+
+    connection.close()
