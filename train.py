@@ -8,6 +8,9 @@ from typing import List
 from subprocess import getoutput
 from PIL import Image
 from logger import LOGGER
+from supabase import Client
+from datetime import datetime
+import config
 
 
 from pydantic import BaseModel
@@ -23,8 +26,13 @@ class TrainImage(BaseModel):
     filename: str
 
 
-def train(session_name: str, images: List[TrainImage]):
-    PT = ""
+class TrainPayload(BaseModel):
+    gender: str
+    images: List[TrainImage]
+
+
+def train(session_name: str, gender, images: List[TrainImage]):
+    PT = f"ojwxwjo"
     INSTANCE_NAME = session_name
     OUTPUT_DIR = os.path.join(Root, "models", session_name)
     SESSION_DIR = os.path.join(Root, 'sessions', session_name)
@@ -32,9 +40,26 @@ def train(session_name: str, images: List[TrainImage]):
     MDLPTH = os.path.join(SESSION_DIR, session_name + '.ckpt')
     CLASS_DIR = os.path.join(SESSION_DIR, 'Regularization_images')
 
+    supabase: Client = config.getSupabase()
+
+    supabase.from_("user_info").update(
+        {
+            "start_training": datetime.now().isoformat(),
+            "in_training": True,
+            "trained": False,
+            "end_training": None
+        }).eq("id", session_name).execute()
+
     if os.path.exists(INSTANCE_DIR):
         shutil.rmtree(INSTANCE_DIR)
     os.makedirs(INSTANCE_DIR, exist_ok=True)
+
+    if os.path.exists(OUTPUT_DIR):
+        shutil.rmtree(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    if os.path.exists(os.path.join(OUTPUT_DIR, 'text_encoder_trained')):
+        shutil.rmtree(os.path.join(OUTPUT_DIR, 'text_encoder_trained'))
 
     for index, image in enumerate(images):
         extension = image.filename.split(".")[-1]
@@ -49,10 +74,10 @@ def train(session_name: str, images: List[TrainImage]):
             file = file.crop((left, top, right, bottom))
             file = file.resize((Crop_size, Crop_size))
         if (extension.upper() == "JPG"):
-            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + " (" + str(index + 1) + ").jpg"),
+            file.save(os.path.join(INSTANCE_DIR, "ojwxwjo" + " (" + str(index + 1) + ").jpg"),
                       format="JPEG", quality=100)
         else:
-            file.save(os.path.join(INSTANCE_DIR, "ejxjo" + " (" + str(index + 1) + ")." + extension),
+            file.save(os.path.join(INSTANCE_DIR, "ojwxwjo" + " (" + str(index + 1) + ")." + extension),
                       format=extension.upper())
 
     # prepare training
@@ -89,12 +114,6 @@ def train(session_name: str, images: List[TrainImage]):
     Text_Encoder_Training_Steps = 350
     Resolution = 512
 
-    if os.path.exists(os.path.join(OUTPUT_DIR, 'text_encoder_trained')):
-        shutil.rmtree(os.path.join(OUTPUT_DIR, 'text_encoder_trained'))
-
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-
     os.makedirs(os.path.join(OUTPUT_DIR, "models"), exist_ok=True)
     os.makedirs(os.path.join(OUTPUT_DIR, "sessions"), exist_ok=True)
     copy('scheduler', OUTPUT_DIR)
@@ -110,7 +129,6 @@ def train(session_name: str, images: List[TrainImage]):
     # Training text encoder
     # dump_only_textenc()
     subprocess.run(["python3", os.path.join("scripts", "train_dreambooth.py")] + [
-        "--image_captions_filename",
         "--train_text_encoder",
         "--dump_only_text_encoder",
         f"--pretrained_model_name_or_path={OUTPUT_DIR}",
@@ -137,7 +155,6 @@ def train(session_name: str, images: List[TrainImage]):
     # Training the UNet
     # train_only_unet
     subprocess.run(["python3", os.path.join("scripts", "train_dreambooth.py")] + [
-        "--image_captions_filename",
         "--train_only_unet",
         f"--save_starting_step={Start_saving_from_the_step}",
         f"--save_n_steps={Save_Checkpoint_Every}",
@@ -164,6 +181,13 @@ def train(session_name: str, images: List[TrainImage]):
         f"--model_path={OUTPUT_DIR}",
         f"--checkpoint_path={checkpoint_path}",
     ], check=True)
+
+    supabase.from_("user_info").update(
+        {
+            "end_training": datetime.now().isoformat(),
+            "trained": True,
+            "in_training": False
+        }).eq("id", session_name).execute()
 
 
 def create_symlink(name: str, destination_dir: str):

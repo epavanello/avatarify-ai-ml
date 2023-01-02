@@ -3,7 +3,7 @@ import random
 import torch
 from torch import autocast
 from diffusers import StableDiffusionPipeline, DDIMScheduler
-from supabase import create_client, Client
+from supabase import Client
 import config
 from typing import Optional
 
@@ -13,8 +13,7 @@ Root = os.getcwd()
 def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
     MODEL_DIR = os.path.join(Root, "models", session_name)
 
-    conf = config.Settings()
-    supabase: Client = create_client(conf.supabase_url, conf.supabase_key)
+    supabase: Client = config.getSupabase()
 
     OUTPUT_DIR = os.path.join(Root, "sessions", session_name, "output")
 
@@ -43,9 +42,10 @@ def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
 
     # @title Run for generating images.
 
-    prompt = prompt  # f"ejxjo"  # @param {type:"string"}
-    negative_prompt = "(disfigured), (bad art), (deformed), (poorly drawn), (extra limbs), strange colours, blurry, boring, sketch, lacklustre, repetitive, cropped, hands"  # @param {type:"string"}
-    num_samples = 1  # @param {type:"number"}
+    prompt = prompt  # f"ojwxwjo"  # @param {type:"string"}
+    # @param {type:"string"}
+    negative_prompt = "(disfigured), (bad art), (deformed), (poorly drawn), (extra limbs), strange colours, blurry, boring, sketch, lacklustre, repetitive, cropped, hands"
+    num_samples = 10  # @param {type:"number"}
     guidance_scale = 7.5  # @param {type:"number"}
     num_inference_steps = 50  # @param {type:"number"}
     height = 512  # @param {type:"number"}

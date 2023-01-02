@@ -22,6 +22,9 @@ def do_work(_channel, method, properties, body: bytes):
     except Exception as e:
         LOGGER.error(e)
         pass
+    except :
+        LOGGER.error(e)
+        pass
     finally:
         pass
 

@@ -12,11 +12,8 @@ def do_work(_channel, method, properties, body: bytes):
     session = properties.headers["session"]
     LOGGER.debug(f"New Training for: {session}")
     try:
-        images_json = body.decode()
-        images_dict = json.loads(images_json)
-        images = parse_obj_as(List[train.TrainImage], images_dict)
-
-        train.train(session, images)
+        payload = train.TrainPayload.parse_raw(body)
+        train.train(session, payload.gender, payload.images)
         LOGGER.debug("Training completed")
     except Exception as e:
         LOGGER.error(e)

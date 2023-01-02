@@ -1,5 +1,5 @@
 from pydantic import BaseSettings
-
+from supabase import create_client, Client
 
 class Settings(BaseSettings):
     rabbitmq_username: str
@@ -11,3 +11,9 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+
+
+def getSupabase():
+    conf = Settings()
+    client: Client = create_client(conf.supabase_url, conf.supabase_key)
+    return client
