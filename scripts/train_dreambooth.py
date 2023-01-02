@@ -360,7 +360,7 @@ class DreamBoothDataset(Dataset):
     def __len__(self):
         return self._length
 
-    def __getitem__(self, index, args = None):
+    def __getitem__(self, index, args=None):
         if args is None:
             args = parse_args()
         example = {}

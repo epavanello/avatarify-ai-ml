@@ -4,7 +4,7 @@ import config
 from typing import List
 import functools
 import threading
-
+from logger import LOGGER
 
 def Run(queues: List[str], do_work):
     conf = config.Settings()
@@ -26,10 +26,10 @@ def Run(queues: List[str], do_work):
     channel = connection.channel()
 
     def long_work(connection, channel, delivery_tag, method, properties, body):
-        print("New message")
+        LOGGER.debug("New message")
         do_work(channel, method, properties, body)
 
-        print("Completed")
+        LOGGER.debug("Message complete")
         cb = functools.partial(ack_message, channel, delivery_tag)
         connection.add_callback_threadsafe(cb)
 
@@ -66,9 +66,6 @@ def Run(queues: List[str], do_work):
         channel.basic_consume(queue=queue,
                               on_message_callback=on_message_callback)
 
-    # Avviare il consumer in modalità blocking, in attesa di ricevere messaggi
-    print('In attesa di ricevere messaggi...')
-        
     try:
         channel.start_consuming()
     except KeyboardInterrupt:

@@ -7,6 +7,7 @@ import subprocess
 from typing import List
 from subprocess import getoutput
 from PIL import Image
+from logger import LOGGER
 
 
 from pydantic import BaseModel
@@ -34,7 +35,6 @@ def train(session_name: str, images: List[TrainImage]):
     if os.path.exists(INSTANCE_DIR):
         shutil.rmtree(INSTANCE_DIR)
     os.makedirs(INSTANCE_DIR, exist_ok=True)
-    print('Session created, proceed to uploading instance images')
 
     for index, image in enumerate(images):
         extension = image.filename.split(".")[-1]
