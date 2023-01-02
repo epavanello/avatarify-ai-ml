@@ -44,7 +44,7 @@ def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
     # @title Run for generating images.
 
     prompt = prompt  # f"ejxjo"  # @param {type:"string"}
-    negative_prompt = ""  # @param {type:"string"}
+    negative_prompt = "(disfigured), (bad art), (deformed), (poorly drawn), (extra limbs), strange colours, blurry, boring, sketch, lacklustre, repetitive, cropped, hands"  # @param {type:"string"}
     num_samples = 1  # @param {type:"number"}
     guidance_scale = 7.5  # @param {type:"number"}
     num_inference_steps = 50  # @param {type:"number"}
