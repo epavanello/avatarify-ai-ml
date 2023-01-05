@@ -11,7 +11,7 @@ from logger import LOGGER
 from supabase import Client
 from datetime import datetime
 import config
-
+import s3
 
 from pydantic import BaseModel
 
@@ -181,6 +181,13 @@ def train(session_name: str, gender, images: List[TrainImage]):
         f"--model_path={OUTPUT_DIR}",
         f"--checkpoint_path={checkpoint_path}",
     ], check=True)
+
+    s3_client = s3.getS3Client()
+
+    s3_client.upload_file(checkpoint_path, 'avatarify-ai-storage',
+                          os.path.join(session_name, session_name + ".ckpt"))
+
+    os.remove(checkpoint_path)
 
     supabase.from_("user_info").update(
         {
