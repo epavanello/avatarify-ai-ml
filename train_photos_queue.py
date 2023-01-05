@@ -13,7 +13,7 @@ def do_work(_channel, method, properties, body: bytes):
     LOGGER.debug(f"New Training for: {session}")
     try:
         payload = train.TrainPayload.parse_raw(body)
-        train.train(session, payload.gender, payload.images)
+        train.train(session, payload.images)
         LOGGER.debug("Training completed")
     except Exception as e:
         LOGGER.error(e)

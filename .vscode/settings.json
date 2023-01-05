@@ -1,1 +1,4 @@
-{}
+{
+    "files.maxMemoryForLargeFilesMB": 1,
+    "workbench.list.openMode": "doubleClick"
+}

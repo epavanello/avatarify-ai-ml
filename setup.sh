@@ -2,13 +2,9 @@
 # wget -O scripts/train_dreambooth.py https://github.com/ShivamShrirao/diffusers/raw/main/examples/dreambooth/train_dreambooth.py
 wget -O scripts/convert_diffusers_to_original_stable_diffusion.py https://github.com/ShivamShrirao/diffusers/raw/main/scripts/convert_diffusers_to_original_stable_diffusion.py
 # wget -O scripts/convertosd.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertosd.py
+# wget -O scripts/convertodiffv1.py https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/convertodiffv1.py
 
-wget -O Womenz 'https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/Regularization/Women'
-wget -O sessions/emanuele/Regularization_images/Men 'https://github.com/TheLastBen/fast-stable-diffusion/raw/3eefcbbaed86ed31c5deb407ced9cf3070d0a2ab/Dreambooth/Regularization/Men'
-wget -O Mixz 'https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/Regularization/Mix'
-unzip Menz
-unzip Womenz
-unzip Mixz
+
 
 
 sudo apt update && sudo apt install python3-pip git-lfs rabbitmq-server
@@ -40,3 +36,8 @@ sed -i 's@"sample_size": 256,@"sample_size": 512,@g' vae/config.json
 
 mkdir sessions
 mkdir models
+
+sudo mkdir /content
+sudo wget -O /content/refmdlz https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/refmdlz
+sudo unzip -o -q /content/refmdlz -d /content
+sudo rm -f /content/refmdlz

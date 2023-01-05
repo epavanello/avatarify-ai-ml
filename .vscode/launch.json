@@ -34,7 +34,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "args": ["--model_path=/home/ubuntu/avatarify-ai-ml/models/f456fdce-640e-4ec2-8dd3-63854f4ac2d3", "--checkpoint_path=/home/ubuntu/avatarify-ai-ml/sessions/f456fdce-640e-4ec2-8dd3-63854f4ac2d3/f456fdce-640e-4ec2-8dd3-63854f4ac2d3.ckpt"]
         }
     ]
 }

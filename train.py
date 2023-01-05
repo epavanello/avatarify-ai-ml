@@ -31,14 +31,12 @@ class TrainPayload(BaseModel):
     images: List[TrainImage]
 
 
-def train(session_name: str, gender, images: List[TrainImage]):
+def train(session_name: str, images: List[TrainImage]):
     PT = f"ojwxwjo"
-    INSTANCE_NAME = session_name
-    OUTPUT_DIR = os.path.join(Root, "models", session_name)
+    MODEL_DIR = os.path.join(Root, "models", session_name)
     SESSION_DIR = os.path.join(Root, 'sessions', session_name)
     INSTANCE_DIR = os.path.join(SESSION_DIR, 'instance_images')
-    MDLPTH = os.path.join(SESSION_DIR, session_name + '.ckpt')
-    CLASS_DIR = os.path.join(SESSION_DIR, 'Regularization_images')
+    MODEL_PATH = os.path.join(SESSION_DIR, session_name + '.ckpt')
 
     supabase: Client = config.getSupabase()
 
@@ -54,12 +52,12 @@ def train(session_name: str, gender, images: List[TrainImage]):
         shutil.rmtree(INSTANCE_DIR)
     os.makedirs(INSTANCE_DIR, exist_ok=True)
 
-    if os.path.exists(OUTPUT_DIR):
-        shutil.rmtree(OUTPUT_DIR)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    if os.path.exists(MODEL_DIR):
+        shutil.rmtree(MODEL_DIR)
+    os.makedirs(MODEL_DIR, exist_ok=True)
 
-    if os.path.exists(os.path.join(OUTPUT_DIR, 'text_encoder_trained')):
-        shutil.rmtree(os.path.join(OUTPUT_DIR, 'text_encoder_trained'))
+    if os.path.exists(os.path.join(MODEL_DIR, 'text_encoder_trained')):
+        shutil.rmtree(os.path.join(MODEL_DIR, 'text_encoder_trained'))
 
     for index, image in enumerate(images):
         extension = image.filename.split(".")[-1]
@@ -114,14 +112,12 @@ def train(session_name: str, gender, images: List[TrainImage]):
     Text_Encoder_Training_Steps = 350
     Resolution = 512
 
-    os.makedirs(os.path.join(OUTPUT_DIR, "models"), exist_ok=True)
-    os.makedirs(os.path.join(OUTPUT_DIR, "sessions"), exist_ok=True)
-    copy('scheduler', OUTPUT_DIR)
-    copy('text_encoder', OUTPUT_DIR)
-    copy('tokenizer', OUTPUT_DIR)
-    copy('unet', OUTPUT_DIR)
-    copy('vae', OUTPUT_DIR)
-    copy('model_index.json', OUTPUT_DIR)
+    copy('scheduler', MODEL_DIR)
+    copy('text_encoder', MODEL_DIR)
+    copy('tokenizer', MODEL_DIR)
+    copy('unet', MODEL_DIR)
+    copy('vae', MODEL_DIR)
+    copy('model_index.json', MODEL_DIR)
 
     # 70 was Train_text_encoder_for > https://bytexd.com/how-to-use-dreambooth-to-fine-tune-stable-diffusion-colab/
     stptxt = int((UNet_Training_Steps*70)/100)
@@ -131,9 +127,9 @@ def train(session_name: str, gender, images: List[TrainImage]):
     subprocess.run(["python3", os.path.join("scripts", "train_dreambooth.py")] + [
         "--train_text_encoder",
         "--dump_only_text_encoder",
-        f"--pretrained_model_name_or_path={OUTPUT_DIR}",
+        f"--pretrained_model_name_or_path={MODEL_DIR}",
         f"--instance_data_dir={INSTANCE_DIR}",
-        f"--output_dir={OUTPUT_DIR}",
+        f"--output_dir={MODEL_DIR}",
         f"--instance_prompt={PT}",
         f"--seed={Seed}",
         "--resolution=512",
@@ -159,9 +155,9 @@ def train(session_name: str, gender, images: List[TrainImage]):
         f"--save_starting_step={Start_saving_from_the_step}",
         f"--save_n_steps={Save_Checkpoint_Every}",
         f"--Session_dir={SESSION_DIR}",
-        f"--pretrained_model_name_or_path={OUTPUT_DIR}",
+        f"--pretrained_model_name_or_path={MODEL_DIR}",
         f"--instance_data_dir={INSTANCE_DIR}",
-        f"--output_dir={OUTPUT_DIR}",
+        f"--output_dir={MODEL_DIR}",
         f"--instance_prompt={PT}",
         f"--seed={Seed}",
         f"--resolution={Resolution}",
@@ -176,18 +172,15 @@ def train(session_name: str, gender, images: List[TrainImage]):
         f"--max_train_steps={UNet_Training_Steps}"
     ], check=True)
 
-    checkpoint_path = os.path.join(OUTPUT_DIR, session_name + ".ckpt")
     subprocess.run(["python3", os.path.join("scripts", "convertosd.py")] + [
-        f"--model_path={OUTPUT_DIR}",
-        f"--checkpoint_path={checkpoint_path}",
+        f"--model_path={MODEL_DIR}",
+        f"--checkpoint_path={MODEL_PATH}",
     ], check=True)
 
     s3_client = s3.getS3Client()
 
-    s3_client.upload_file(checkpoint_path, 'avatarify-ai-storage',
+    s3_client.upload_file(MODEL_PATH, 'avatarify-ai-storage',
                           os.path.join(session_name, session_name + ".ckpt"))
-
-    os.remove(checkpoint_path)
 
     supabase.from_("user_info").update(
         {
@@ -197,10 +190,8 @@ def train(session_name: str, gender, images: List[TrainImage]):
         }).eq("id", session_name).execute()
 
 
-def create_symlink(name: str, destination_dir: str):
-    if not os.path.exists(os.path.join(destination_dir, name)):
-        os.symlink(os.path.join(Root, "stable-diffusion-v1-5", name),
-                   os.path.join(destination_dir, name))
+    shutil.rmtree(MODEL_DIR)
+    shutil.rmtree(SESSION_DIR)
 
 
 def copy(name: str, destination_dir: str):
