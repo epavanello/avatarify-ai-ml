@@ -5,9 +5,11 @@ from typing import Optional
 import time
 from logger import LOGGER
 
+
 class GeneratePayload(BaseModel):
     theme: str
     prompt: str
+    negative_prompt: str
     seed: Optional[int]
 
 
@@ -17,12 +19,13 @@ def do_work(_channel, method, properties, body: bytes):
     LOGGER.debug(f"New image for: {session}")
     try:
         payload = GeneratePayload.parse_raw(body)
-        generate.generate(session, payload.theme, payload.prompt, payload.seed)
+        generate.generate(session, payload.theme, payload.prompt,
+                          payload.negative_prompt, payload.seed)
         LOGGER.debug("Image complete")
     except Exception as e:
         LOGGER.error(e)
         pass
-    except :
+    except:
         LOGGER.error(e)
         pass
     finally:

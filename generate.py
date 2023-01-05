@@ -12,26 +12,27 @@ from typing import Optional
 Root = os.getcwd()
 
 
-def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
-    MODEL_DIR = os.path.join(Root, "models", session_name)
+def generate(session_name: str, theme: str, prompt: str, negative_prompt: str, seed: Optional[int]):
     SESSION_DIR = os.path.join(Root, 'sessions', session_name)
-    MODEL_PATH = os.path.join(SESSION_DIR, session_name + '.ckpt')
-    BASE_MODEL = os.path.join(Root, "stable-diffusion-v1-5")
 
     os.makedirs(SESSION_DIR, exist_ok=True)
 
-    # s3_client = s3.getS3Client()
-
-    # s3_client.download_file('avatarify-ai-storage',
-    #                         os.path.join(session_name, session_name + ".ckpt"),
-    #                         MODEL_PATH)
-
     if not os.path.exists(os.path.join(SESSION_DIR, "model_index.json")):
+        MODEL_PATH = os.path.join(SESSION_DIR, session_name + '.ckpt')
+        s3_client = s3.getS3Client()
+
+        s3_client.download_file('avatarify-ai-storage',
+                                os.path.join(
+                                    session_name, session_name + ".ckpt"),
+                                MODEL_PATH)
+
         subprocess.run(["python3", os.path.join("scripts", "convertodiffv1.py")] + [
             f"{MODEL_PATH}",
             f"{SESSION_DIR}",
             "--v1"
         ], check=True)
+
+        os.remove(MODEL_PATH)
 
     OUTPUT_DIR = os.path.join(Root, "sessions", session_name, "output")
 
@@ -55,14 +56,11 @@ def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
 
     # @title Run for generating images.
 
-    prompt = prompt  # f"ojwxwjo"  # @param {type:"string"}
-    # @param {type:"string"}
-    negative_prompt = "(disfigured), (bad art), (deformed), (poorly drawn), (extra limbs), strange colours, blurry, boring, sketch, lacklustre, repetitive, cropped, hands"
     num_samples = 1  # @param {type:"number"}
     guidance_scale = 7.5  # @param {type:"number"}
     num_inference_steps = 50  # @param {type:"number"}
-    height = 512  # @param {type:"number"}
     width = 512  # @param {type:"number"}
+    height = 512  # @param {type:"number"}
 
     with autocast("cuda"), torch.inference_mode():
         images = pipe(
@@ -92,7 +90,6 @@ def generate(session_name: str, theme: str, prompt: str, seed: Optional[int]):
         resp = photos_generated.upload(session_name + "/" + str(start_index + index + 1) + "_" + filename,
                                        filepath_tmp)
         os.remove(filepath_tmp)
-        assert resp.is_success
 
 
 def create_symlink(name: str, destination_dir: str):

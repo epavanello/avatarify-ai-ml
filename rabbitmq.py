@@ -19,7 +19,7 @@ def Run(queues: List[str], do_work):
                                            credentials=credentials,
                                            ssl_options=pika.SSLOptions(
                                                context),
-                                           heartbeat=0)
+                                           heartbeat=5)
 
     # Creare una connessione a RabbitMQ
     connection = pika.BlockingConnection(parameters)
@@ -66,13 +66,36 @@ def Run(queues: List[str], do_work):
         channel.basic_consume(queue=queue,
                               on_message_callback=on_message_callback)
 
+    # before
     try:
         channel.start_consuming()
     except KeyboardInterrupt:
         channel.stop_consuming()
+
+    # test
+    # try:
+    #     connection.process_data_events()
+    # except KeyboardInterrupt:
+    #     pass
 
     # Wait for all to complete
     for thread in threads:
         thread.join()
 
     connection.close()
+
+    # try:
+    #     while True:
+    #         global has_message
+    #         has_message = False
+    #         connection.process_data_events()
+    #         if not has_message:
+    #             break
+
+    #         # Wait for all to complete
+    #         for thread in threads:
+    #             thread.join()
+    # except KeyboardInterrupt:
+    #     pass
+
+    # connection.close()
