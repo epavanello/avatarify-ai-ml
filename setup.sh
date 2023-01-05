@@ -41,3 +41,6 @@ sudo mkdir /content
 sudo wget -O /content/refmdlz https://github.com/TheLastBen/fast-stable-diffusion/raw/main/Dreambooth/refmdlz
 sudo unzip -o -q /content/refmdlz -d /content
 sudo rm -f /content/refmdlz
+
+echo "[default]\nregion=eu-south-1" > ~/.aws/config
+echo "token" > ~/.huggingface/token
