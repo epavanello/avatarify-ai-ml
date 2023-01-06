@@ -5,6 +5,11 @@ from typing import List
 import functools
 import threading
 from logger import LOGGER
+import datetime
+import time
+
+last_message = datetime.datetime.now()
+
 
 def Run(queues: List[str], do_work):
     conf = config.Settings()
@@ -19,7 +24,7 @@ def Run(queues: List[str], do_work):
                                            credentials=credentials,
                                            ssl_options=pika.SSLOptions(
                                                context),
-                                           heartbeat=5)
+                                           heartbeat=300)
 
     # Creare una connessione a RabbitMQ
     connection = pika.BlockingConnection(parameters)
@@ -34,6 +39,9 @@ def Run(queues: List[str], do_work):
         connection.add_callback_threadsafe(cb)
 
     def on_message(channel, method_frame, header_frame, body, args):
+        print("New message")
+        global last_message
+        last_message = datetime.datetime.now()
         (connection, threads) = args
         delivery_tag = method_frame.delivery_tag
         t = threading.Thread(target=long_work, args=(
@@ -67,35 +75,39 @@ def Run(queues: List[str], do_work):
                               on_message_callback=on_message_callback)
 
     # before
-    try:
-        channel.start_consuming()
-    except KeyboardInterrupt:
-        channel.stop_consuming()
-
-    # test
     # try:
-    #     connection.process_data_events()
+    #     channel.start_consuming()
     # except KeyboardInterrupt:
-    #     pass
+    #     channel.stop_consuming()
 
-    # Wait for all to complete
-    for thread in threads:
-        thread.join()
+    # # test
+    # # try:
+    # #     connection.process_data_events()
+    # # except KeyboardInterrupt:
+    # #     pass
 
-    connection.close()
-
-    # try:
-    #     while True:
-    #         global has_message
-    #         has_message = False
-    #         connection.process_data_events()
-    #         if not has_message:
-    #             break
-
-    #         # Wait for all to complete
-    #         for thread in threads:
-    #             thread.join()
-    # except KeyboardInterrupt:
-    #     pass
+    # # Wait for all to complete
+    # for thread in threads:
+    #     thread.join()
 
     # connection.close()
+
+    try:
+        exit = False
+        while not exit:
+            print("Check new messages")
+            connection.process_data_events()
+
+            now = datetime.datetime.now()
+            exit = ((now - last_message).total_seconds() / 60) > 1
+            time.sleep(5)
+
+            # Wait for all to complete
+            for thread in threads:
+                thread.join()
+    except KeyboardInterrupt:
+        pass
+    
+    print("Exit")
+
+    connection.close()
