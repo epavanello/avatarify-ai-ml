@@ -106,6 +106,7 @@ def Run(queues: List[str], do_work):
             # Wait for all to complete
             for thread in threads:
                 thread.join()
+        os.system("sudo shutdown")
     except KeyboardInterrupt:
         pass
     
