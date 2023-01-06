@@ -7,9 +7,5 @@ LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
 
 
 LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
-
-for log_name, log_obj in logging.Logger.manager.loggerDict.items():
-     if log_name != __name__:
-          log_obj.disabled = True

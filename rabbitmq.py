@@ -40,7 +40,7 @@ def Run(queues: List[str], do_work):
         connection.add_callback_threadsafe(cb)
 
     def on_message(channel, method_frame, header_frame, body, args):
-        print("New message")
+        LOGGER.info("New message")
         global last_message
         last_message = datetime.datetime.now()
         (connection, threads) = args
@@ -96,7 +96,7 @@ def Run(queues: List[str], do_work):
     try:
         exit = False
         while not exit:
-            print("Check new messages")
+            LOGGER.info("Check new messages")
             connection.process_data_events()
 
             now = datetime.datetime.now()
@@ -109,8 +109,6 @@ def Run(queues: List[str], do_work):
     except KeyboardInterrupt:
         pass
     
-    print("Exit")
+    LOGGER.info("Exit")
 
     connection.close()
-
-    os.system("sudo shutdown")

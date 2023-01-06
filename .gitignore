@@ -3,3 +3,4 @@ models/
 sessions/
 __pycache__/
 .env
+.log
