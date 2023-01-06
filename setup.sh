@@ -27,7 +27,7 @@ echo -e "scheduler\ntext_encoder\ntokenizer\nunet\nmodel_index.json" > .git/info
 git pull origin main
 git clone "https://USER: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@huggingface.co/stabilityai/sd-vae-ft-mse"
 mv sd-vae-ft-mse vae
-rm -r .git
+sudo rm -r .git
 rm model_index.json
 wget https://raw.githubusercontent.com/TheLastBen/fast-stable-diffusion/main/Dreambooth/model_index.json
 sed -i 's@"clip_sample": false@@g' scheduler/scheduler_config.json

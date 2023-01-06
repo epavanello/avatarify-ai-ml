@@ -7,6 +7,7 @@ import threading
 from logger import LOGGER
 import datetime
 import time
+import os
 
 last_message = datetime.datetime.now()
 
@@ -99,7 +100,7 @@ def Run(queues: List[str], do_work):
             connection.process_data_events()
 
             now = datetime.datetime.now()
-            exit = ((now - last_message).total_seconds() / 60) > 1
+            exit = ((now - last_message).total_seconds() ) > 300
             time.sleep(5)
 
             # Wait for all to complete
@@ -111,3 +112,5 @@ def Run(queues: List[str], do_work):
     print("Exit")
 
     connection.close()
+
+    os.system("sudo shutdown")
