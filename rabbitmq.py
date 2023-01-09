@@ -100,12 +100,13 @@ def Run(queues: List[str], do_work):
             connection.process_data_events()
 
             now = datetime.datetime.now()
-            exit = ((now - last_message).total_seconds() ) > 300
+            exit = ((now - last_message).total_seconds() ) > 120
             time.sleep(5)
 
             # Wait for all to complete
             for thread in threads:
                 thread.join()
+        LOGGER.info("Timeout: shutdown")
         os.system("sudo shutdown")
     except KeyboardInterrupt:
         pass

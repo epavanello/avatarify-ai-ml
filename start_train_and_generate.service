@@ -1,0 +1,10 @@
+[Unit]
+Description=Train and generate
+
+[Service]
+Type=simple
+ExecStart=/home/ubuntu/avatarify-ai-ml/start_train_and_generate.sh
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target

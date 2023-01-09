@@ -42,17 +42,22 @@ sudo wget -O /content/refmdlz https://github.com/TheLastBen/fast-stable-diffusio
 sudo unzip -o -q /content/refmdlz -d /content
 sudo rm -f /content/refmdlz
 
-echo "[default]\nregion=eu-south-1" > ~/.aws/config
+echo -e "[default]\nregion=eu-south-1" > ~/.aws/config
 echo "token" > ~/.huggingface/token
 
-sudo ln /home/ubuntu/avatarify-ai-ml/start_train.sh /etc/init.d/train
-sudo chmod + /etc/init.d/train
-sudo update-rc.d train defaults
+sudo ln /home/ubuntu/avatarify-ai-ml/start_train.service /etc/systemd/system/train.service
+sudo systemctl daemon-reload
+sudo systemctl enable train.service
+sudo systemctl start train.service
 
-sudo ln /home/ubuntu/avatarify-ai-ml/start_generate.sh /etc/init.d/generate
-sudo chmod + /etc/init.d/generate
-sudo update-rc.d generate defaults
+sudo ln /home/ubuntu/avatarify-ai-ml/start_generate.service /etc/systemd/system/generate.service
+sudo systemctl daemon-reload
+sudo systemctl enable generate.service
+sudo systemctl start generate.service
 
-sudo ln /home/ubuntu/avatarify-ai-ml/start_train_and_generate.sh /etc/init.d/start_train_and_generate
-sudo chmod + /etc/init.d/start_train_and_generate
-sudo update-rc.d start_train_and_generate defaults
+sudo ln /home/ubuntu/avatarify-ai-ml/start_train_and_generate.service /etc/systemd/system/train_and_generate.service
+sudo systemctl daemon-reload
+sudo systemctl enable train_and_generate.service
+sudo systemctl start train_and_generate.service
+
+sudo systemctl stop XXX.service
