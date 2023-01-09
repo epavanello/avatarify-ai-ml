@@ -12,6 +12,7 @@ import os
 last_message = datetime.datetime.now()
 
 
+
 def Run(queues: List[str], do_work):
     conf = config.Settings()
 
@@ -93,27 +94,34 @@ def Run(queues: List[str], do_work):
 
     # connection.close()
 
+    global last_message
     try:
         exit = False
         while not exit:
-            LOGGER.info("Check new messages")
+            LOGGER.info("RabbitMQ ping")
             connection.process_data_events()
 
             now = datetime.datetime.now()
-            exit = ((now - last_message).total_seconds()) > 120
-            time.sleep(5)
-
-            # Wait for all to complete
-            for thread in threads:
-                thread.join()
+            exit = ((now - last_message).total_seconds()) > 300
+            if exit:
+                for thread in threads:
+                    if thread.isAlive():
+                        LOGGER.info("Restore timer because there are running threads")
+                        exit = False
+                        last_message = datetime.datetime.now()
+                        break
+            time.sleep(60)
         LOGGER.info("Timeout: shutdown")
     except Exception as e:
-        pass
-    except:
         LOGGER.error(e)
+    except:
         pass
     finally:
         os.system("sudo shutdown")
+
+    # Wait for all to complete
+    for thread in threads:
+        thread.join()
 
     LOGGER.info("Exit")
 
