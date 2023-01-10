@@ -98,7 +98,7 @@ def Run(queues: List[str], do_work):
     try:
         exit = False
         while not exit:
-            LOGGER.info("RabbitMQ ping")
+            LOGGER.debug("RabbitMQ ping")
             connection.process_data_events()
 
             now = datetime.datetime.now()
@@ -110,7 +110,7 @@ def Run(queues: List[str], do_work):
                         exit = False
                         last_message = datetime.datetime.now()
                         break
-            time.sleep(60)
+            time.sleep(2)
         LOGGER.info("Timeout: shutdown")
     except Exception as e:
         LOGGER.error(e)

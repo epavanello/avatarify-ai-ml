@@ -43,7 +43,7 @@ sudo unzip -o -q /content/refmdlz -d /content
 sudo rm -f /content/refmdlz
 
 echo -e "[default]\nregion=eu-south-1" > ~/.aws/config
-echo "token" > ~/.huggingface/token
+echo "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" > ~/.huggingface
 
 sudo ln /home/ubuntu/avatarify-ai-ml/start_train.service /etc/systemd/system/train.service
 sudo systemctl daemon-reload
