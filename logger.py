@@ -1,11 +1,10 @@
 import logging
 import logging.config
-
-
-LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
-              '-35s %(lineno) -5d: %(message)s')
-
+from logtail import LogtailHandler
 
 LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+handler = LogtailHandler(source_token="FaKeNoewAeGNJaxmVLKghFCS")
+LOGGER.handlers = []
+LOGGER.setLevel(logging.INFO)
+LOGGER.addHandler(handler)
 

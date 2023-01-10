@@ -10,11 +10,11 @@ from logger import LOGGER
 
 def do_work(_channel, method, properties, body: bytes):
     session = properties.headers["session"]
-    LOGGER.debug(f"New Training for: {session}")
+    LOGGER.info(f"New Training for: {session}")
     try:
         payload = train.TrainPayload.parse_raw(body)
         train.train(session, payload.images)
-        LOGGER.debug("Training completed")
+        LOGGER.info("Training completed")
     except Exception as e:
         LOGGER.error(e)
         pass

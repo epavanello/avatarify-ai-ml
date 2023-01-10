@@ -33,15 +33,14 @@ def Run(queues: List[str], do_work):
     channel = connection.channel()
 
     def long_work(connection, channel, delivery_tag, method, properties, body):
-        LOGGER.debug("New message")
+        LOGGER.info("New message: " + method.routing_key)
         do_work(channel, method, properties, body)
 
-        LOGGER.debug("Message complete")
+        LOGGER.info("Message complete: " + method.routing_key)
         cb = functools.partial(ack_message, channel, delivery_tag)
         connection.add_callback_threadsafe(cb)
 
     def on_message(channel, method_frame, header_frame, body, args):
-        LOGGER.info("New message")
         global last_message
         last_message = datetime.datetime.now()
         (connection, threads) = args
