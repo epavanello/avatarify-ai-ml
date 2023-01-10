@@ -7,7 +7,7 @@ import argparse
 import os.path as osp
 
 import torch
-
+import logging
 
 # =================#
 # UNet Conversion #
@@ -177,7 +177,7 @@ def convert_vae_state_dict(vae_state_dict):
             mapping[k] = v
     new_state_dict = {v: vae_state_dict[k] for k, v in mapping.items()}
     weights_to_convert = ["q", "k", "v", "proj_out"]
-    print("[1;32mConverting to CKPT ...")    
+    logging.info("Converting to CKPT ...")
     for k, v in new_state_dict.items():
         for weight_name in weights_to_convert:
             if f"mid.attn_1.{weight_name}.weight" in k:
@@ -238,7 +238,7 @@ def main():
     state_dict = {k:v.half() for k,v in state_dict.items()}
     state_dict = {"state_dict": state_dict}
     torch.save(state_dict, checkpoint_path)
-    print("Saved on: " + checkpoint_path)    
+    logging.info("Saved on: " + checkpoint_path)
 
 if __name__ == "__main__":
     main()

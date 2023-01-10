@@ -5,6 +5,7 @@ Description=Train and generate
 Type=simple
 ExecStart=/home/ubuntu/avatarify-ai-ml/start_train_and_generate.sh
 User=ubuntu
+Environment="LOG_TO_FILE=true"
 
 [Install]
 WantedBy=multi-user.target

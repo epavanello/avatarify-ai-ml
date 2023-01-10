@@ -22,6 +22,7 @@ from PIL import Image
 from torchvision import transforms
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
+import logging
 
 
 logger = get_logger(__name__)
@@ -498,7 +499,7 @@ def Run(args):
             pipeline.to(accelerator.device)
 
             for example in tqdm(
-                sample_dataloader, desc="Generating class images", disable=not accelerator.is_local_main_process
+                sample_dataloader, desc="Generating class images", disable=os.environ.get('LOG_TO_FILE') is not None
             ):
                 with torch.autocast("cuda"):
                     images = pipeline(example["prompt"]).images
@@ -705,7 +706,7 @@ def Run(args):
     logger.info(f"  Total optimization steps = {args.max_train_steps}")
     # Only show the progress bar once on each machine.
     progress_bar = tqdm(range(args.max_train_steps),
-                        disable=not accelerator.is_local_main_process)
+                        disable=os.environ.get('LOG_TO_FILE') is not None)
     global_step = 0
 
     for epoch in range(args.num_train_epochs):
@@ -803,7 +804,6 @@ def Run(args):
 
             if args.train_text_encoder and global_step == args.stop_text_encoder_training and global_step >= 5:
                 if accelerator.is_main_process:
-                    print(" [0;32m" + " Freezing the text_encoder ..."+" [0m")
                     frz_dir = args.output_dir + "/text_encoder_frozen"
                     if os.path.exists(frz_dir):
                         subprocess.call('rm -r ' + frz_dir, shell=True)
@@ -825,7 +825,7 @@ def Run(args):
                         os.mkdir(save_dir)
                     inst = save_dir[16:]
                     inst = inst.replace(" ", "_")
-                    print(" [1;32mSAVING CHECKPOINT...")
+                    logging.info("Saving checkpoint ...")
                     # Create the pipeline using the trained modules and save it.
                     if accelerator.is_main_process:
                         pipeline = StableDiffusionPipeline.from_pretrained(
@@ -848,7 +848,7 @@ def Run(args):
                         else:
                             subprocess.call(
                                 'python /content/diffusers/scripts/convertosdv2.py ' + save_dir + ' ' + chkpth, shell=True)
-                        print("Done, resuming training ...[0m")
+                        logging.info("Done, resuming training ...")
                         subprocess.call('rm -r ' + save_dir, shell=True)
                         i = i+args.save_n_steps
 
