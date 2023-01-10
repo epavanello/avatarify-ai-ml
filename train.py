@@ -27,7 +27,6 @@ class TrainImage(BaseModel):
 
 
 class TrainPayload(BaseModel):
-    gender: str
     images: List[TrainImage]
 
 
