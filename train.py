@@ -7,7 +7,6 @@ import subprocess
 from typing import List
 from subprocess import getoutput
 from PIL import Image
-from logger import LOGGER
 from supabase import Client
 from datetime import datetime
 import config

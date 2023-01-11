@@ -8,6 +8,9 @@ import config
 import s3
 import subprocess
 from typing import Optional
+from PIL import Image
+from typing import List
+from logger import LOGGER
 
 Root = os.getcwd()
 
@@ -62,6 +65,7 @@ def generate(session_name: str, theme: str, prompt: str, negative_prompt: str, s
     width = 512  # @param {type:"number"}
     height = 512  # @param {type:"number"}
 
+    images: List[Image.Image]
     with autocast("cuda"), torch.inference_mode():
         images = pipe(
             prompt,
@@ -86,7 +90,9 @@ def generate(session_name: str, theme: str, prompt: str, negative_prompt: str, s
         filename = theme + "_" + str(seed) + ".jpg"
         filepath_tmp = os.path.join(OUTPUT_DIR, filename)
 
+        LOGGER.info({"theme":  theme,
+                    "prompt": prompt, "negative_prompt": negative_prompt, "seed": seed, "filename": filename})
         img.save(filepath_tmp)
-        resp = photos_generated.upload(session_name + "/" + str(start_index + index + 1) + "_" + filename,
-                                       filepath_tmp)
+        photos_generated.upload(session_name + "/" + str(start_index + index + 1) + "_" + filename,
+                                filepath_tmp)
         os.remove(filepath_tmp)

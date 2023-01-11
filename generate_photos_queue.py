@@ -14,9 +14,8 @@ class GeneratePayload(BaseModel):
 
 def do_work(_channel, method, properties, body: bytes):
     session = properties.headers["session"]
-
+    LOGGER.info(f"New image for: {session}")
     payload = GeneratePayload.parse_raw(body)
-    LOGGER.info(f"New image for: {session}, theme: {payload.theme}")
     generate.generate(session, payload.theme, payload.prompt,
                       payload.negative_prompt, payload.seed)
     LOGGER.info("Image complete")
