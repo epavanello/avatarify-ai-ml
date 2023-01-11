@@ -90,9 +90,3 @@ def generate(session_name: str, theme: str, prompt: str, negative_prompt: str, s
         resp = photos_generated.upload(session_name + "/" + str(start_index + index + 1) + "_" + filename,
                                        filepath_tmp)
         os.remove(filepath_tmp)
-
-
-def create_symlink(name: str, destination_dir: str):
-    if not os.path.exists(os.path.join(destination_dir, name)):
-        os.symlink(os.path.join(Root, "stable-diffusion-v1-5", name),
-                   os.path.join(destination_dir, name))
