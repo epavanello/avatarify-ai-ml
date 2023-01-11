@@ -30,7 +30,7 @@ class TrainPayload(BaseModel):
 
 
 def train(session_name: str, images: List[TrainImage]):
-    PT = f"ojwxwjo"
+    PT = f"a photo of a ojwxwjo person"
     MODEL_DIR = os.path.join(Root, "models", session_name)
     SESSION_DIR = os.path.join(Root, 'sessions', session_name)
     INSTANCE_DIR = os.path.join(SESSION_DIR, 'instance_images')
@@ -80,7 +80,7 @@ def train(session_name: str, images: List[TrainImage]):
     # TODO restore: It was * 100
     UNet_Training_Steps = len(images) * 100
     # @param ["1e-6","2e-6","3e-6","4e-6","5e-6"] {type:"raw"}
-    UNet_Learning_Rate = 2e-6
+    UNet_Learning_Rate = 1e-5
     untlr = UNet_Learning_Rate
     Seed = random.randint(1, 999999)
 
