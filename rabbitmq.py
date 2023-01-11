@@ -12,8 +12,8 @@ import os
 last_message = datetime.datetime.now()
 
 
-
 def Run(queues: List[str], do_work):
+    LOGGER.info("Server started for: " + ", ".join(queues))
     conf = config.Settings()
 
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
@@ -34,9 +34,15 @@ def Run(queues: List[str], do_work):
 
     def long_work(connection, channel, delivery_tag, method, properties, body):
         LOGGER.info("New message: " + method.routing_key)
-        do_work(channel, method, properties, body)
+        
+        try:
+            do_work(channel, method, properties, body)
+            LOGGER.info("Message complete: " + method.routing_key)
+        except Exception as e:
+            LOGGER.error("Message failed: " + method.routing_key)
+            LOGGER.error(e)
+            pass
 
-        LOGGER.info("Message complete: " + method.routing_key)
         cb = functools.partial(ack_message, channel, delivery_tag)
         connection.add_callback_threadsafe(cb)
 
@@ -105,7 +111,8 @@ def Run(queues: List[str], do_work):
             if exit:
                 for thread in threads:
                     if thread.isAlive():
-                        LOGGER.info("Restore timer because there are running threads")
+                        LOGGER.info(
+                            "Restore timer because there are running threads")
                         exit = False
                         last_message = datetime.datetime.now()
                         break
@@ -116,12 +123,15 @@ def Run(queues: List[str], do_work):
     except:
         pass
     finally:
+        LOGGER.info("Server shutdown")
         os.system("sudo shutdown")
 
     # Wait for all to complete
     for thread in threads:
         thread.join()
 
-    LOGGER.info("Exit")
+    LOGGER.info("Server closing")
 
     connection.close()
+
+    LOGGER.info("Connection closed")
